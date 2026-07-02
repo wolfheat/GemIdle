@@ -6,7 +6,7 @@ Jun 2026
 * IDEAS
 - Make a minimalistic game where you harvest and invest by using Gems
 
-
+ 
 30/6	* Started with idea for the project
 1/7		* Added Game Area Grid
 		* Added Inventory
