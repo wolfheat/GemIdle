@@ -1,0 +1,440 @@
+GemIdle 2026
+
+DEVLOG FOR GemIdle 2026
+Jun 2026
+
+* IDEAS
+- Make a minimalistic game where you harvest and invest by using Gems
+
+
+30/6	* Started with idea for the project
+1/7		* Added Game Area Grid
+		* Added Inventory
+		* Added Cards
+		* Cards are Draggable can move inside game area, also Highlights the target box
+		* Cards can now move between Inventory and GameArea
+		* Cards are Scriptable Objects that can be generated when needed
+		* Holder takes care of dragged object and placed objects layering
+		* Made basic tick system
+
+		* Make dragging cards show the actual card
+		* Make cards swap if placed ontop of each other
+		* Right click card returns it to inventory? or other mechanic?
+		* Make ticks update stats
+
+		TODO:
+
+		* Make Clicking Gem animate it - should be used for gaining gems later
+
+
+		* Let player change tool when running, but not when using one
+
+		LASK CHECK
+
+
+		VITAL - 1
+
+		UNNECCESSARY - 5
+
+		DONE
+
+
+
+
+
+
+
+		[PC build 69Mb]		[WebGL build 62Mb]3m17s		[Linux BUild 81Mb]36s
+
+
+
+		* New release 0.0.14
+
+///////////////////////////////////////////////////////////////////////////
+	<b>Credits
+	</b>
+
+
+	A game by wolfheat
+
+
+
+
+
+
+	A variety of assets were used to create this game.
+
+
+	<b>Graphic</b>
+	3D
+	Synty Studio Asset Packs
+	Ancient Empire
+	Construction
+	Kids
+	Mini City
+	NightClub
+	Office
+	Town
+
+	Gece Studio - Dragon Head
+
+	2D
+	Vector Dividers Collection -  Start menu Dividers
+	Kenney - Icons from asset packs
+	Zooperdan - Printer Display Image
+	avatar
+	macrovector - Postit
+	Ben Clark - Vector Notes
+
+	VFX
+	Unity Technologies - Particle Pack
+
+	<b>Audio</b>
+
+	FreeSounds,Pixabay - Various Sounds assets
+	Uppbeat - Music
+
+	<b>Music</b>
+	Brock Hewitt - In The Silence
+	Monument Music - Love Story
+
+	<b>Fonts</b>
+	Prida01 - gluk
+
+	<b>Tools Used</b>
+	Audacity
+	Gimp
+	Blender
+	Unity
+
+	<b>Game Jam</b>
+	This game was created for the
+	Dungeon Crawler Game Jam 2026
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+		// Things to fix later
+		* Fix enemies get stuck in walk animation	
+		* Skeletons dont attack again sometimes even when player is in front of it
+		* Cats sstart to walk towards player instead of fire attack when in line
+		* Maybe remake the pathfinding and movement system so it uses the same method - refactoring it
+
+		// Visuals
+		* Game runs slow
+		* Game stutters, check profiler for optimizations
+		* Skeletons get hurt while moving goes to idle for rest of move animation should go to walk
+		* Sledgehammer still got funky animation 
+		* Black smoke for pickups blocks view when stepping into the and elevated
+
+		// Content
+		* Add dino?
+		* Add Flesh enemy
+		* Have result screen showing players score - NO NEED
+
+
+		// MAYBE
+		* Maybe have picked minerals animate up to the UI bar?
+		* Fix saving system?
+		* Add wobble effect for returning to life again? Or Vignette?
+		* Make skeleton take damage and attacking animation better
+		* Have player taken to result screen before going to main menu? - MAYBE NO NEED
+		* Have player not gain control during the beginning speech, player stuck in bed - After Jam?
+		
+		// SOLVED ?
+		* Still some issue with player stabbing walls after attacking enemies - FIX
+						
+		JAM FEEDBACK
+
+		* Better objectives
+		* To repetitive, shorter game loop, smaller game size, better waypoints
+		* Better enemy combat
+
+
+		SPEECH NEEDED
+
+		MAYBE
+		* Add health refill object like food etc
+
+		MAYBE - LAST CALLS
+		* Placing bombs sound may be better
+		* Adjust skeleton Build Up sound
+		* Make it clearer when enemy hits player, does it hit to fast? Slow down attack but move faster?
+		* Add sound effects for boosts running out?
+		* Make different meshes for different minerals
+		* Have jingle play when player has a powerup?
+		
+		GENNY AI - MATHEW VOICE -
+
+
+***	GAME JAM ***
+
+31/3 17:00 SUBMISSION DUE
+		
+
+		// Game Name ??
+		* Dig down Crawl Up 
+		* Down To Earth
+
+		// Walls
+		* Make blocks have variarity in hitpoints / tools needed?
+		* Have cracks show percentage of damage so they dont update every hit if the damage is to low etc
+
+		// Scenes
+		* Have end transition for completing game or dying that feels epic?
+
+		// System
+		* Extend sound data to include a list of sound clips - DONT DO FOR JAM
+		* Extend sound data to include a list pitches? - DONT DO FOR JAM
+		* Allow scalable game window - DONT DO FOR JAM
+
+		// Bugs
+		* Maybe issue with wrong block being hit, might be because the stack of walls in front of player is not updated when reaching new spot? - ALLOW FOR JAM
+
+
+
+- - - - - -  SUNO MUSIC - - - - - - 
+[Start]
+[Intro]
+[Verse]
+[Chorus]
+[Verse]
+[Chorus]
+(record scratching) Like a DJ, Guitar solo, Drum Solo
+
+
+You got a Dream
+
+[Start]
+	
+[Verse]
+You got a dream, you've got a vision
+Don't you agree? Complete this mission
+Deep down inside, the answer has grown
+Dig deep and find, what you already know
+
+[Chorus]
+My game is great, game is fantastic,
+I'm not the same, maybe I'm drastic
+World passes by, and I got no clue
+The game must complete, you have no clue
+My game is great, game is fantastic,
+I'm not the same, maybe I'm drastic
+World passes by, and I got no clue
+The game must complete, its all up to you
+
+[Verse]
+Early morning to the late of night
+You keep on pushing through,
+You see a glow throughout your fight
+That shine comes from within you
+
+[Chorus]
+My game is great,(great) game is fantastic,
+I'm not the same,(same) maybe I'm drastic
+World passes by,(by by) I got no clue
+The game must complete, it is up to you
+My game is great,(great) game is fantastic,
+I'm not the same,(same) maybe I'm drastic
+World passes by,(by by) I got no clue
+The game must complete, it is up to you
+
+
+Female Pop Energetic Ballad
+[Piano]
+[Verse]
+You got a dream, you've got a vision
+Don't lose your steam, complete the mission
+Gather your strength, alone or on a team
+You will succeed, fulfill your dream (fulfill your dream)
+
+[Chorus]
+Your game is great, Your game is massive
+Your not the same, Your turning passive
+As The World pass by, You got no clue
+To Complete that Game, You keep pushing through
+	
+[Verse]
+Early morning to the late of night
+You strive and you won't budge,
+There is no one there to stop your fight
+But you are your hardest judge
+So stand up straight, head held high and shout (you shout)
+
+[Chorus]
+My game is great, My game is massive
+I'm not the same, I'm turning passive
+As The World pass by, I got no clue
+To Complete that Game, I will keep pushing through
+	
+[End]
+
+
+
+
+		-------------------
+		* Julian feedback
+		* BUG - Moving slider on Spinner or any Crafting station does not update the amount created text
+		* BUG - Agency blob info is text is bugged but should also tell player how agency is gained somehow
+		* BUG - Harvesting a stone, saving and reloading game, keeps stone as allready harvested but without red indicator
+		* CHANGE - player get already harvested notification for mining the kiln
+		* CHANGE - player is able to move after initiating a tool and before the mini game starts	
+		* CHANGE - Spinner seems to queue up objects created, but player cant see this queue
+		* SUGGESTION - Spinner should prob have a header showing the name of the station
+		* SUGGESTION - the research station should state that the items needed to research wont get comsumed
+		* SUGGESTION - would be nice to be able to TAB out of crafting stations
+
+		// These bugs seems to happen after the game already broke some
+		* BUG - Game not allowing tools to be dropped? Maybe this should be allowed. If inventory is full player cant pick up anything.
+		* BUG - Placing the kiln leaves the icon in the inventory as well as placing it in world, it also gets placed before releasing mouse button, prob as soon as it hits a valid spot?
+		* BUG - Stone axe recipes filling up workstations recipe list - photo
+		* BUG - equipping a tool when already having a tool equipped but no free space in inventory destroyes/"player lose" the removed tool
+		* BUG - After a few seconds in the workstation the output changes to show the players inventory instead		
+		* BUG - Time seems to have stopped at 12:40 on day 7	
+			
+		* Completing ballpeople task before activating the ballperson wont make it possible to complete the task?
+		* small spelling error in the notice after exiting the fissure he -> the
+		* player is able to jump when gathering sticks etc
+		* No Translation found for seed - picture
+
+		* BUG - Still an issue - Stone axe recipes filling up workstations recipe list - photo Still an issue
+			OUTPUT shown below crafting station at this point, saving at this point ruins/removes the save file from showing up in load (the aliv files exists in file system)
+		* Going back to main menu unsets the sound settings briefly like half a second or so.
+		* Going back to main menu and restarting a new game starts with old name filled in in the input box
+
+		// Picking up stone right before using it for reconstruction messes up the popup amount -Video https://gemoo.com/tools/upload-video/share/625434510884421632?codeId=PYabol9J9lb4B&card=625434507273125888
+		* SUGGESTION -  maybe have agency as an item in the compendium that describes more what it is and how to aquire it 
+
+
+		* having bowl equipped and unequipping it still shows player holding it
+		* Unable to save game - video
+		* Setting audio for animals to 0 still allowes high volume for birds
+
+		* Interacting with stations does not respond to E if its held or slowly pressed, only reacts to fast type E
+
+		* NOT SURE - using wrong tool on harvested resource shows already harvested, should it be wrong tool notice?
+
+
+		* SUGGESTION - Could have a light slider in settings, it gets a bit to dark in the night
+		* Holding shift and starting to move should start as running, If it supposed to be a toggle for run then it should only switch off if player presses shift again
+		* Settings store the sliders in volume at correct position but does not start audiosources at correct volume
+		* Stuck in spyglass forever
+		-------------------
+		
+
+
+
+
+		* SUGGESTION - Speed up boost -> destroys walls in one hit for 10 seconds
+
+		* Implement level saving to file
+		* Implement load save or restart
+
+		* Game to fast? - MAYBE
+		* Have player auto change tool for what needs to be used
+		* Make pickaxe tool instead of sledge hammer
+		* Have upgradable tools - MAYBE
+
+		* If something is placed in game that looks like a promise, make sure it has a reward and is not just a mockup
+
+		* // Make sures //
+			Fluent Gameplay, Good Controls
+			Correct view aspect FOV etc
+			Fun - Appeal - Scope
+			Replayability	- Have timer? Make player go "I want to beat my score"
+							- Secrets have player know how many secrets they found
+
+			Fun -> Not frustrating nor boring -> Player wants to feel Accomplishment - Meaning - Empowerment - UNpredictabillity - Avoidance - Ownership
+			Appeal -> Presentation - Fantasy - Readability
+			Scope -> 
+
+		* Add animation for picking up items into inventory
+		* Add animation for destroying walls
+
+		* Adding functionality to actually pick up the items
+
+		- SETTINGS
+		* Gray Out bar when muted - MAYBE
+		* Make cleared menu, maybe have darker background area around text and buttons
+
+		 - MECHANICS
+		* Make support for left handers
+
+
+
+		
+		
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 		
+		* USED IN PROJECT
+
+		CHECKLIST FOR BETTER PLAYER EXPERIENCE
+
+		* BUGS, CRASHES, SLOW PERFORMANCE
+		* MISLEADING MARKETING
+		* NOT ENGAGING WITH COMMUNITY
+		* CONFIGURABLE CONTROLS,
+		* TEXT TO SMALL,
+		* CONTRAST,
+		* MISSING FEATURE
+
+------ ------- ------
+
+
+[Intro]
+
+[Verse]
+The skeleton and crawlers, keep haunting hour lands
+With our towns collective force, we came up with some forceful plans
+From the tavern in our town, you could hear this gentle roar
+We have had enough, it is enough, we won't take this no more (won't take this no more)
+
+[Chorus]
+We are heading to the dungeon,
+We are slaying all the beasts,
+We are bringing back the Peace,
+in our glorious return,
+We are heading to the dungeon,
+We are slaying all the beasts,
+We are bringing back the Peace,
+in our glorious return
+
+[Verse 2]
+We fought into the darkness, but hour strength was not enough
+All our efforts was in vain, as this fight was all too tough
+Many men we lost in battle, as we fought for hour lives
+Just a few of us remaining, when we returned to hour wives. (Returned to our wives)
+
+[Chorus]
+We are heading to the dungeon,
+We are slaying all the beasts,
+We are bringing back the Peace,
+in our glorious return,
+We are heading to the dungeon,
+We are slaying all the beasts,
+We are bringing back the Peace,
+in our glorious return
+
+[Verse 3]
+All hour wiman held a meeting, how to deal with this ordeal
+We must all fight this together, doesn't matter what we feel
+So we gathered our last strength, we will fight or we will die
+And then back into the darkness, for a final battle cry. (Final battle cry)
+
+[Build Up]
+[Chorus]
+We are heading to the dungeon,
+We are slaying all the beasts,
+We are bringing back the Peace,
+in our glorious return,
+We are heading to the dungeon,
+We are slaying all the beasts,
+We are bringing back the Peace,
+and no one heard from us again...
+
+[Short Dramatic Ending]
