@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Wolfheat.StartMenu;
 
 public class GameAreaController : MonoBehaviour
 {
@@ -57,7 +59,17 @@ public class GameAreaController : MonoBehaviour
         }
     }
 
-    internal void PlaceCard(Card mimicedCard, int xPos, int yPos)
+    internal void SwapCards(Card mimicedCard, Card targetCard)
+    {
+        Vector2Int fromPos = mimicedCard.PlacedGameAreaPosition.Pos;
+        Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
+
+
+        PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
+        PlaceCard(targetCard, fromPos.x, fromPos.y ,false);
+    }
+
+    internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true)
     {
         // Unset its old position?  Not needed if only reference to it is it being a child - might change later
 
@@ -74,6 +86,24 @@ public class GameAreaController : MonoBehaviour
         // Scale it to fit the Box
         RectTransform rect = mimicedCard.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
+        
+        RemoveOldPlacement(mimicedCard, unsetOldPosition);
+
+        mimicedCard.Place(xPos,yPos);
+
+        placedCards[xPos, yPos] = mimicedCard;
+
+    }
+
+    public void RemoveOldPlacement(Card mimicedCard, bool unsetOldPosition = true)
+    {
+        // If it was placed, remove old placement
+        Vector2Int oldPos = mimicedCard.PlacedGameAreaPosition.Pos;
+        if (oldPos.x != -1) {
+            if(unsetOldPosition)
+                placedCards[oldPos.x, oldPos.y] = null;
+            mimicedCard.Place(-1, -1);
+        }
     }
 
     internal void Tick()
@@ -87,9 +117,18 @@ public class GameAreaController : MonoBehaviour
 
                 Card card = placedCards[i, j];
 
-                Debug.Log("Gain Income from card on " + i + "," + j + " = " + card.GetIncome());
+                card.Tick();
+
+                Debug.Log("Gain Income from card on " + i + "," + j + " = " + card.GetIncomeGain());
+
+                GemType gemType = card.GemType();
+
+                Stats.AddGems(gemType, card.GetIncomeGain());
 
             }
         }
     }
+
+    internal bool PositionHasOccupier(int x, int y) => placedCards[x, y] != null;
+    internal Card Occupier(int x, int y) => placedCards[x, y];
 }

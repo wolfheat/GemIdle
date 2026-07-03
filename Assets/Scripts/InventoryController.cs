@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Wolfheat.StartMenu;
 
 public class InventoryController : MonoBehaviour
 {
@@ -28,20 +29,46 @@ public class InventoryController : MonoBehaviour
         // Place Card in Inventroy -  Add it to the Holder - Also keep track of it?
         mimicedCard.transform.parent = itemHolder;
 
+        // removes from GameArea if present there
+        GameAreaController.Instance.RemoveOldPlacement(mimicedCard);
+
         // Scale it to fit the Box
         RectTransform rect = mimicedCard.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(BoxWidth, BoxHeight);
+
+        SoundMaster.Instance.PlaySound(SoundName.PickupCard);
+
     }
 
-    public void GenerateRandomCard()
+    public void GenerateRedCard() => GenerateRandomCard(GemType.Red);
+    public void GenerateGreenCard() => GenerateRandomCard(GemType.Green);
+    public void GenerateBlueCard() => GenerateRandomCard(GemType.Blue);
+
+    public void GenerateRedGainCard() => GenerateRandomCard(GemType.Red, 1);
+    public void GenerateGreenGainCard() => GenerateRandomCard(GemType.Green, 1);
+    public void GenerateBlueGainCard() => GenerateRandomCard(GemType.Blue, 1);
+
+
+
+    public void GenerateRandomCard(GemType type, int subType = 0)
     {
-        Card card = ItemCreator.Instance.GenerateCard();
+        // Play sound for button
+
+        SoundMaster.Instance.PlaySound(SoundName.ButtonClick);
+
+        GenerateCard(type, subType);
+    }
+
+    private void GenerateCard(GemType type, int subType = 0)
+    {
+        Card card = ItemCreator.Instance.GenerateCard(type, subType);
 
         // Place Card in Inventroy -  Add it to the Holder - Also keep track of it?
         card.transform.parent = itemHolder;
 
         // Scale it to fit the Box
         RectTransform rect = card.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(BoxWidth, BoxHeight);
+        rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
+        rect.localScale = Vector2.one;
     }
 }

@@ -21,15 +21,16 @@ Jun 2026
 		* Make cards swap if placed ontop of each other
 		* Right click card returns it to inventory? or other mechanic?
 		* Make ticks update stats
+3/7		* Added Deskbuilder Menu
+		* Added Sound and Music
+
 
 		TODO:
 
 		* Make Clicking Gem animate it - should be used for gaining gems later
 
 
-		* Let player change tool when running, but not when using one
-
-		LASK CHECK
+		LAST CHECK
 
 
 		VITAL - 1

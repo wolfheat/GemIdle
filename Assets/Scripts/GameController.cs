@@ -2,6 +2,7 @@ using System;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Wolfheat.StartMenu;
 
 public class GameController : MonoBehaviour
 {
@@ -9,9 +10,10 @@ public class GameController : MonoBehaviour
     private float tickTimer = 0f;
 
     [SerializeField] private BaseCard ghostCard; 
+    [SerializeField] private Transform ghostHolder; 
 	
 	
-	private Card mimicedCard = null; 
+	private Card mimicCard = null; 
 
 	public static GameController Instance { get; private set; }
 
@@ -22,7 +24,11 @@ public class GameController : MonoBehaviour
 			return;
 		}
 		Instance = this;
-	}
+
+		//Initiate Stats
+		Stats.Initiate();
+
+    }
 
 
     private void Update()
@@ -37,18 +43,28 @@ public class GameController : MonoBehaviour
 
 
         if (Mouse.current.leftButton.wasReleasedThisFrame) {
-			Debug.Log("Mouse Released this frame");
+			//Debug.Log("Mouse Released this frame");
 			StopDrag();
         }
 
-		if (mimicedCard != null) {
+		if (mimicCard != null) {
 			Vector2Int highlight = GetHighlightIndex();
             GameAreaController.Instance.HighlightSlot(highlight.x,highlight.y);
-        }
+
+			ghostCard.transform.position = Mouse.current.position.ReadValue();
+
+
+            // Scale it to fit the Box
+            RectTransform rect = ghostCard.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
+
+		}
+		
     }
 
     private void Tick()
     {
+		//Debug.Log("TICK");
 		GameAreaController.Instance.Tick();
     }
 
@@ -58,19 +74,26 @@ public class GameController : MonoBehaviour
 		//Debug.Log("Mouse pressed: [" + Mouse.current.position.ReadValue().x+"," + Mouse.current.position.ReadValue().y + "]");
 
 		
-		ghostCard.gameObject.SetActive(true);
+		//ghostCard.gameObject.SetActive(true);
+
+		// Try instantiating and cloning the dragged card
+
+		if(ghostCard != null)
+			Destroy(ghostCard.gameObject);
+
+		ghostCard = Instantiate(cardToDrag, ghostHolder);
 
 
-		mimicedCard = cardToDrag;
-
-        mimicedCard?.gameObject.SetActive(false);
-
+		mimicCard = cardToDrag;
+		// Deactivate the dragged one
+        mimicCard?.gameObject.SetActive(false);
 
         // Set Ghostcard to mimic this Card
         ghostCard.Mimic(cardToDrag);
 
 		// Hide the dragged card - fix later
-
+		if(mimicCard == null)
+			Debug.Log("Lost Mimic Card");
 	}
 	
 	private Vector2Int GetHighlightIndex()
@@ -96,8 +119,10 @@ public class GameController : MonoBehaviour
 
 	public void StopDrag()
 	{
-		if (mimicedCard == null)
+		if (mimicCard == null) {
+			Debug.Log("Stop Drag, no mimic Card issue....");
 			return;
+		}
 
 
         // Request to stop dragging
@@ -106,9 +131,11 @@ public class GameController : MonoBehaviour
         Vector2Int localIndex = GetHighlightIndex();
 
         // Move or return the mimicedCard 
-        mimicedCard?.gameObject.SetActive(true);
+        mimicCard?.gameObject.SetActive(true);
 
-		// Also need to handle invalid placement to unset the mimic
+        Debug.Log("Activate Card again");
+
+        // Also need to handle invalid placement to unset the mimic
         if (localIndex.x < 0 || localIndex.y < 0 || localIndex.x >= 7 || localIndex.y >= 5) {
 			// return Item its outside
 			Debug.Log("Return Item its outside.");
@@ -116,16 +143,35 @@ public class GameController : MonoBehaviour
 			if(localIndex.y >= 5) {
 				// Place the item back in inventory
 				Debug.Log("Place in Inventory + remove it from old position");
-                InventoryController.Instance.PlaceCard(mimicedCard);
+                InventoryController.Instance.PlaceCard(mimicCard);
+			}
+			else {
+
+                SoundMaster.Instance.PlaySound(SoundName.PlaceError);
             }
 			return;
 		}
 
-		if(mimicedCard != null) {
-			GameAreaController.Instance.PlaceCard(mimicedCard,localIndex.x,localIndex.y);
+		if(mimicCard != null) {
+			Card placedCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y);
+
+			if (placedCard != null) {
+
+                SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
+
+                // SwapCards
+				GameAreaController.Instance.SwapCards(mimicCard, placedCard);
+            }
+			else {
+				GameAreaController.Instance.PlaceCard(mimicCard,localIndex.x,localIndex.y);
+
+                SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
+            }
         }
-		else
+		else {
+
 			Debug.Log("Mimic is NUll shouldnt reach here");
-        mimicedCard = null;
+		}
+		mimicCard = null;
     }
 }

@@ -2,7 +2,6 @@
 using UnityEngine;
 public enum GemType { Red, Green, Blue }
 
-
 public static class GameStats
 {
     public const int Width = 7;
@@ -10,13 +9,34 @@ public static class GameStats
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
 }
+
+
+
 public static class Stats
 {
     public static int RedGems = 0;
     public static int GreenGems = 0;
     public static int BlueGems = 0;
     public static Action<GemType> GemUpdate;
+    internal static int[] OwnedCards;
+    internal static int[] CurrentDeck;
 
+    public static bool IsPaused { get; internal set; }
+
+    public static void Initiate()
+    {
+        Debug.Log("Stats Initiate");
+        int totalAmtCards = Enum.GetValues(typeof(CardDataType)).Length;
+
+        // Initiate the Card Owned Array - Later load this from file
+        OwnedCards = new int[totalAmtCards];
+        CurrentDeck = new int[totalAmtCards];
+        OwnedCards[0] = 1;
+        OwnedCards[1] = 1;
+        OwnedCards[2] = 1;
+
+        CurrentDeck[2] = 1;
+    }
 
     public static void AddGems(GemType type, int amt = 1)
     {

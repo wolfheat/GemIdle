@@ -328,7 +328,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 200}
+  m_SizeDelta: {x: 140, y: 140}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8452142440470303761
 CanvasRenderer:
@@ -382,7 +382,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Card
   image: {fileID: 6657025234049159428}
   descriptionText: {fileID: 1239493314669058189}
+  inPlay: 1
   cardData: {fileID: 0}
+  dotTimer: {fileID: 0}
+  gainTextField: {fileID: 0}
 --- !u!1 &6194997392097081000
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,7 +528,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +35 <sprite name=RedGem>
+  m_text: +35  <sprite name=RedGem>
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: def077e4414dd604a8b34df28ff90d09, type: 2}
   m_sharedMaterial: {fileID: 3014870588608968086, guid: def077e4414dd604a8b34df28ff90d09, type: 2}
@@ -544,7 +547,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 11400000, guid: b2c2f32130ef8c643bcdcd1b1437f438, type: 2}
+  m_spriteAsset: {fileID: 11400000, guid: b0111a2d3c30a7944a35dd2800b72ab5, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -806,7 +809,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8490566, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
