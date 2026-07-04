@@ -26,6 +26,7 @@ Jun 2026
 		* Fixed Swapping between Inventory and GameArea
 4/7		* Made rigthclicking return a card to inventory and place on first available spot if it was in the inventory
 		* Made ordering possible in inventory
+		* Added multiplier cards
 
 
 		TODO:

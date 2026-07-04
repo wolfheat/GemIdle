@@ -62,6 +62,11 @@ public class GameController : MonoBehaviour
 		
     }
 
+    public void ToggleAnimate()
+    {
+		Stats.AnimateCards = !Stats.AnimateCards;
+    }
+	
     private void Tick()
     {
 		//Debug.Log("TICK");
@@ -159,7 +164,10 @@ public class GameController : MonoBehaviour
 			Card placedCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y);
 
 			if (placedCard != null) {
-
+				if (CanMerge(placedCard, mimicCard)) {
+					// Merged
+                    return;
+				}
                 // SwapCards
 				GameAreaController.Instance.SwapCards(mimicCard, placedCard);
             }
@@ -172,5 +180,40 @@ public class GameController : MonoBehaviour
 			Debug.Log("Mimic is NUll shouldnt reach here");
 		}
 		mimicCard = null;
+    }
+
+    private bool CanMerge(Card placedCard, Card mimicCard)
+    {
+        // If this is a multiplier and merging with normal card the merge is more difficult
+        // Might need to move the other card to this position and then apply the mult
+
+        // Case mimic is mult card
+        if (!mimicCard.IsMultiplier && !placedCard.IsMultiplier) return false;
+
+        if (placedCard.IsMultiplier) {
+            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
+            (placedCard,mimicCard) = (mimicCard,placedCard);
+        } 
+
+        ApplyMultToPlacedCard();
+
+        return true;
+
+        void ApplyMultToPlacedCard()
+        {
+            int multiplier = mimicCard.Multiplier;
+
+            placedCard.MultiplyGainBy(multiplier);
+
+            // Remove The Card
+            RemoveCard(mimicCard);
+        }
+    }
+
+    private static void RemoveCard(Card mimicCard)
+    {
+        // Later maybe move to dump for reuse
+        mimicCard.UnsetPosition();
+        Destroy(mimicCard.gameObject);
     }
 }

@@ -77,10 +77,12 @@ public class InventoryController : MonoBehaviour
     public void GenerateGreenCard() => GenerateRandomCard(GemType.Green);
     public void GenerateBlueCard() => GenerateRandomCard(GemType.Blue);
 
+
     public void GenerateRedGainCard() => GenerateRandomCard(GemType.Red, 1);
     public void GenerateGreenGainCard() => GenerateRandomCard(GemType.Green, 1);
     public void GenerateBlueGainCard() => GenerateRandomCard(GemType.Blue, 1);
 
+    public void GenerateMultCard() => GenerateRandomCard(GemType.Neutral,0);
 
 
     public void GenerateRandomCard(GemType type, int subType = 0)

@@ -301,6 +301,7 @@ GameObject:
   - component: {fileID: 8452142440470303761}
   - component: {fileID: 6306394856934255495}
   - component: {fileID: 2341054555434722214}
+  - component: {fileID: 4302367022877727080}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -386,6 +387,18 @@ MonoBehaviour:
   cardData: {fileID: 0}
   dotTimer: {fileID: 0}
   gainTextField: {fileID: 0}
+--- !u!114 &4302367022877727080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6168715365378092674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee29cea22edeb9d46a873367772ff82f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardAnimator
 --- !u!1 &6194997392097081000
 GameObject:
   m_ObjectHideFlags: 0

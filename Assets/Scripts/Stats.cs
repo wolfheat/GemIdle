@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-public enum GemType { Red, Green, Blue }
+public enum GemType { Red, Green, Blue , Neutral}
 
 public static class GameStats
 {
@@ -20,6 +20,7 @@ public static class Stats
     public static Action<GemType> GemUpdate;
     internal static int[] OwnedCards;
     internal static int[] CurrentDeck;
+    internal static bool AnimateCards = false;
 
     public static bool IsPaused { get; internal set; }
 

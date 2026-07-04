@@ -7,11 +7,13 @@ public class ItemCreator : MonoBehaviour
 {
     [SerializeField] private Card cardPrefab;
     [SerializeField] private Card gainercardPrefab;
+    [SerializeField] private Card multiplierPrefab;
     
     [SerializeField] private CardData[] redCardDatas;
     [SerializeField] private CardData[] greenCardDatas;
     [SerializeField] private CardData[] blueCardDatas;
-    [SerializeField] private CardData[] cardLibrary;
+    [SerializeField] private CardData[] blackCardDatas;
+    private CardData[] cardLibrary;
 
     public static ItemCreator Instance { get; private set; }
 
@@ -24,7 +26,7 @@ public class ItemCreator : MonoBehaviour
         Instance = this;
 
         // Make a List of all cards and give them an ID
-        cardLibrary = redCardDatas.Concat(greenCardDatas).Concat(blueCardDatas).ToArray();
+        cardLibrary = redCardDatas.Concat(greenCardDatas).Concat(blueCardDatas).Concat(blackCardDatas).ToArray();
 
     }
 
@@ -50,10 +52,18 @@ public class ItemCreator : MonoBehaviour
         // Create a base Card
         Card card;
         
-        if (data is GainerCardData)
-            card = Instantiate(gainercardPrefab);
-        else
-            card = Instantiate(cardPrefab);
+        switch (data) {
+            case GainerCardData:
+                card = Instantiate(gainercardPrefab);
+                break;
+            case MultiplyCardData:
+                card = Instantiate(multiplierPrefab);
+                break;
+            default:
+                card = Instantiate(cardPrefab);
+                break;
+        }
+
 
         // Fill it with data
         card.SetData(data);
@@ -75,6 +85,7 @@ public class ItemCreator : MonoBehaviour
             GemType.Red => redCardDatas,
             GemType.Green => greenCardDatas,
             GemType.Blue => blueCardDatas,
+            GemType.Neutral => blackCardDatas,
             _ => redCardDatas
         };
     }

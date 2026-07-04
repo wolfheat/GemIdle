@@ -25,13 +25,20 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     
     private int currentIncome = 0;
     private int currentGain = 0;
+    private int currentMultiplier = 0;
 
     public GameAreaPosition PlacedGameAreaPosition { get; internal set; } = new GameAreaPosition() { Pos = new Vector2Int(-1, -1) };
+    public bool IsMultiplier => cardData is MultiplyCardData;
+    public int Multiplier => ((MultiplyCardData)cardData).BaseMultiplier;
+
     public void UnsetPosition()
     {
         GameAreaController.Instance.RemoveOldPlacement(this);
 
         PlacedGameAreaPosition.Pos = new Vector2Int(-1, -1);
+
+        if(gameObject.TryGetComponent(out CardAnimator animator))
+            animator.ResetScale();
     }
 
     private void Start()
@@ -115,21 +122,29 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     {
         if (cardData == null) return;
 
-        if (cardData is GainerCardData) {
-
-            currentGain = ((GainerCardData)cardData).baseGain;
-            gainTextField.text = "+" + currentGain;
+        switch (cardData) {
+            case GainerCardData:
+                currentGain = ((GainerCardData)cardData).BaseGain;
+                gainTextField.text = "+" + currentGain;
+                image.sprite = cardData.Image;
+                currentIncome = cardData.baseIncome;
+                break;
+            case MultiplyCardData:
+                currentGain = 0;
+                currentMultiplier = ((MultiplyCardData)cardData).BaseMultiplier;
+                gainTextField.text = "x " + currentMultiplier;
+                break;
+            default:
+                image.sprite = cardData.Image;
+                currentIncome = cardData.baseIncome;
+                break;
         }
-
 
         string colorForGemInsideText = GemColorString(cardData);
 
         // Fill in the data onto the card from the datafile
         descriptionText.text = "+" + cardData.baseIncome + "   <sprite name=" + cardData.Image.name + ">";
-
-        image.sprite = cardData.Image;
-
-        currentIncome = cardData.baseIncome;
+                
     }
 
     private string GemColorString(CardData data)
@@ -185,4 +200,11 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     }
 
     internal void DisableInPlay() => inPlay = false;
+
+
+    public void MultiplyGainBy(int multiplier)
+    {
+        currentIncome *= multiplier;
+        currentMultiplier *= multiplier;
+    }
 }

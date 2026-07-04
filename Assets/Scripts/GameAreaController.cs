@@ -127,6 +127,8 @@ public class GameAreaController : MonoBehaviour
                 Card card = placedCards[i, j];
 
                 card.Tick();
+                CardAnimator animator = card.GetComponent<CardAnimator>();
+                animator?.Animate();
 
                 Debug.Log("Gain Income from card on " + i + "," + j + " = " + card.GetIncomeGain());
 
