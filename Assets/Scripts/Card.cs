@@ -26,6 +26,12 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     private int currentGain = 0;
 
     public GameAreaPosition PlacedGameAreaPosition { get; internal set; } = new GameAreaPosition() { Pos = new Vector2Int(-1, -1) };
+    public void UnsetPosition()
+    {
+        GameAreaController.Instance.RemoveOldPlacement(this);
+
+        PlacedGameAreaPosition.Pos = new Vector2Int(-1, -1);
+    }
 
     private void Start()
     {

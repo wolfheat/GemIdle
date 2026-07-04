@@ -24,10 +24,12 @@ public class InventoryController : MonoBehaviour
         Instance = this;
     }
         
-    internal void PlaceCard(Card mimicedCard)
+    internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true)
     {
-        // Place Card in Inventroy -  Add it to the Holder - Also keep track of it?
+        // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
         mimicedCard.transform.parent = itemHolder;
+
+        mimicedCard.UnsetPosition();
 
         // removes from GameArea if present there
         GameAreaController.Instance.RemoveOldPlacement(mimicedCard);

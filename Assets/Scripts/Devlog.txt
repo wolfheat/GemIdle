@@ -23,9 +23,17 @@ Jun 2026
 		* Make ticks update stats
 3/7		* Added Deskbuilder Menu
 		* Added Sound and Music
+		* Fixed Swapping between Inventory and GameArea
+
 
 
 		TODO:
+		* Add limitation when adding cards to the deck in the deckbuilder. 
+			* Need at least 10 cards to be valid
+			* Can only add the cards you own
+			* Maybe have saved decks that you can reload fast when needed
+
+		* Moving items on top of a placed item should swap it into inventory?
 
 		* Make Clicking Gem animate it - should be used for gaining gems later
 

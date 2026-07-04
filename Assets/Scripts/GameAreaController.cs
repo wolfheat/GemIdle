@@ -64,6 +64,12 @@ public class GameAreaController : MonoBehaviour
         Vector2Int fromPos = mimicedCard.PlacedGameAreaPosition.Pos;
         Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
 
+        if(fromPos.x == -1) {
+            // Card is coming from the hand
+            InventoryController.Instance.PlaceCard(targetCard, false);
+            PlaceCard(mimicedCard, toPos.x, toPos.y, false);
+            return;
+        }
 
         PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
         PlaceCard(targetCard, fromPos.x, fromPos.y ,false);

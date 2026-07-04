@@ -31,9 +31,9 @@ public static class Stats
         // Initiate the Card Owned Array - Later load this from file
         OwnedCards = new int[totalAmtCards];
         CurrentDeck = new int[totalAmtCards];
-        OwnedCards[0] = 1;
-        OwnedCards[1] = 1;
-        OwnedCards[2] = 1;
+        OwnedCards[0] = 2;
+        OwnedCards[1] = 2;
+        OwnedCards[2] = 3;
 
         CurrentDeck[2] = 1;
     }

@@ -57,7 +57,6 @@ public class DeckBuilder : MonoBehaviour
             Destroy(t.gameObject);
         }
 
-        int[] currentDeck = Stats.CurrentDeck;
 
         for (int i = 0; i < currentDeck.Length; i++) {
             if (currentDeck[i] == 0) continue;
@@ -84,6 +83,7 @@ public class DeckBuilder : MonoBehaviour
     }
 
     private int[] ownedCards;
+    private int[] currentDeck;
 
     private void FillOwnedCards()
     {
@@ -102,7 +102,12 @@ public class DeckBuilder : MonoBehaviour
 
             DeckSleeve sleeve = Instantiate(deckbuilderCardSleevePrefab, deckHolder);
 
-            sleeve.SetSleeveDataID(i, 0);
+            // Add data to sleeve in ownedcards to show multiples amt
+
+            int amtLeft = ownedCards[i]-currentDeck[i];
+
+            sleeve.SetSleeveDataID(i, 0, amtLeft);
+
             Debug.Log("Creating Owned Card "+i);
 
             Card ownedCard = ItemCreator.Instance.GenerateCard(i, false);
@@ -117,7 +122,10 @@ public class DeckBuilder : MonoBehaviour
         Debug.Log("Received click from Holder "+ HolderID+" ID: "+ID);
 
         if(HolderID == 0) {
-
+            if (Stats.OwnedCards[ID] - Stats.CurrentDeck[ID] <= 0) {
+                Debug.Log("No More cards in ");
+                return;
+            }
             // Add this card to the Deck
             Stats.CurrentDeck[ID]++;
 
@@ -141,6 +149,11 @@ public class DeckBuilder : MonoBehaviour
 
     private void UpdateDeckbuilder()
     {
+
+        currentDeck = Stats.CurrentDeck;
+
+        ownedCards = Stats.OwnedCards;
+
         FillOwnedCards();
 
         FillCurrentDeckCards();
