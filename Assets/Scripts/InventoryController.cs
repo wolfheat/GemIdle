@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
 
 public class InventoryController : MonoBehaviour
@@ -24,10 +26,17 @@ public class InventoryController : MonoBehaviour
         Instance = this;
     }
         
-    internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true)
+    internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true, bool useMousePositionToOrder = true)
     {
+
         // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
         mimicedCard.transform.parent = itemHolder;
+        
+        if (useMousePositionToOrder) {
+            int order = GetInventoryOrderByMousePosition();
+            mimicedCard.transform.SetSiblingIndex(order);
+        }
+
 
 
         // removes from GameArea if present there
@@ -43,6 +52,25 @@ public class InventoryController : MonoBehaviour
         if(unsetOldPosition) // This also acts as a determiner if the pickup sound should be heared or if its enought with the swap sound
             SoundMaster.Instance.PlaySound(SoundName.PickupCard);
 
+    }
+
+    private int GetInventoryOrderByMousePosition()
+    {
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+
+        int finalIndex = 0;
+        for (int i = 0; i < itemHolder.childCount; i++) {
+            GameObject child = itemHolder.GetChild(i).gameObject;
+            Debug.Log("Child: "+i+" Name:" + child.name +  " Active: "+child.activeSelf);
+
+            if (!child.activeSelf) {
+                continue;
+            }
+            if(mousePos.x<itemHolder.GetChild(i).transform.position.x)
+                return finalIndex;
+            finalIndex++;
+        }
+        return itemHolder.childCount;
     }
 
     public void GenerateRedCard() => GenerateRandomCard(GemType.Red);

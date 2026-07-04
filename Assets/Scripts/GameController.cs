@@ -116,7 +116,6 @@ public class GameController : MonoBehaviour
 		return localIndex;
     }
 
-
 	public void StopDrag()
 	{
 		if (mimicCard == null) {
@@ -130,15 +129,13 @@ public class GameController : MonoBehaviour
 
         Vector2Int localIndex = GetHighlightIndex();
 
-        // Move or return the mimicedCard 
-        mimicCard?.gameObject.SetActive(true);
+        //Debug.Log("Activate Card again");
 
-        Debug.Log("Activate Card again");
 
         // Also need to handle invalid placement to unset the mimic
         if (localIndex.x < 0 || localIndex.y < 0 || localIndex.x >= 7 || localIndex.y >= 5) {
 			// return Item its outside
-			Debug.Log("Return Item its outside.");
+			//Debug.Log("Return Item its outside.");
 
 			if(localIndex.y >= 5) {
 				// Place the item back in inventory
@@ -149,10 +146,16 @@ public class GameController : MonoBehaviour
 
                 SoundMaster.Instance.PlaySound(SoundName.PlaceError);
             }
-			return;
-		}
 
-		if(mimicCard != null) {
+            // Move or return the mimicedCard 
+            mimicCard?.gameObject.SetActive(true);
+			return;
+        }
+
+        // Move or return the mimicedCard 
+        mimicCard?.gameObject.SetActive(true);
+
+        if (mimicCard != null) {
 			Card placedCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y);
 
 			if (placedCard != null) {

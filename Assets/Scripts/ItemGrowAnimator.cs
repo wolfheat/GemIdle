@@ -12,7 +12,7 @@ public class ItemGrowAnimator : MonoBehaviour
 
     internal void Animate()
     {
-        Debug.Log("Animate Gem");
+        //Debug.Log("Animate Gem");
         if (animateRoutine != null)
             return;
         animateRoutine = StartCoroutine(AnimateCO());
