@@ -157,15 +157,11 @@ public class GameController : MonoBehaviour
 
 			if (placedCard != null) {
 
-                SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
-
                 // SwapCards
 				GameAreaController.Instance.SwapCards(mimicCard, placedCard);
             }
 			else {
 				GameAreaController.Instance.PlaceCard(mimicCard,localIndex.x,localIndex.y);
-
-                SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
             }
         }
 		else {

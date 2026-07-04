@@ -29,16 +29,19 @@ public class InventoryController : MonoBehaviour
         // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
         mimicedCard.transform.parent = itemHolder;
 
-        mimicedCard.UnsetPosition();
 
         // removes from GameArea if present there
         GameAreaController.Instance.RemoveOldPlacement(mimicedCard);
+
+        // Make the card forget its placement as well - Need to happen after
+        mimicedCard.UnsetPosition();
 
         // Scale it to fit the Box
         RectTransform rect = mimicedCard.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(BoxWidth, BoxHeight);
 
-        SoundMaster.Instance.PlaySound(SoundName.PickupCard);
+        if(unsetOldPosition) // This also acts as a determiner if the pickup sound should be heared or if its enought with the swap sound
+            SoundMaster.Instance.PlaySound(SoundName.PickupCard);
 
     }
 

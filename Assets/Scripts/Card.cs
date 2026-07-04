@@ -3,6 +3,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Wolfheat.StartMenu;
 
 public class GameAreaPosition
 {
@@ -51,6 +52,21 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             // Do deckbuilding stuff here instead
             return;
         }
+
+        if (eventData.button == PointerEventData.InputButton.Right) {
+            if(PlacedGameAreaPosition.Pos.x == -1) {
+                Debug.Log("Card in inventory, on Right click, try to place it on first Empty space");
+                // Maybe place it on first available empty spot?
+                bool canPlace = GameAreaController.Instance.PlaceCardOnFirstEmptySpot(this);
+                if (!canPlace)
+                    SoundMaster.Instance.PlaySound(SoundName.PlaceError);
+            }
+            else {
+                InventoryController.Instance.PlaceCard(this);
+            }
+            return;
+        }
+
         Debug.Log("Start To Drag Item");
 
         isDragged = true;

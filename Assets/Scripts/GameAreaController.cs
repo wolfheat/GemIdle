@@ -68,11 +68,12 @@ public class GameAreaController : MonoBehaviour
             // Card is coming from the hand
             InventoryController.Instance.PlaceCard(targetCard, false);
             PlaceCard(mimicedCard, toPos.x, toPos.y, false);
-            return;
         }
-
-        PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
-        PlaceCard(targetCard, fromPos.x, fromPos.y ,false);
+        else {
+            PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
+            PlaceCard(targetCard, fromPos.x, fromPos.y ,false);
+        }
+        SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
     }
 
     internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true)
@@ -98,6 +99,8 @@ public class GameAreaController : MonoBehaviour
         mimicedCard.Place(xPos,yPos);
 
         placedCards[xPos, yPos] = mimicedCard;
+
+        SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
 
     }
 
@@ -137,4 +140,18 @@ public class GameAreaController : MonoBehaviour
 
     internal bool PositionHasOccupier(int x, int y) => placedCards[x, y] != null;
     internal Card Occupier(int x, int y) => placedCards[x, y];
+
+    internal bool PlaceCardOnFirstEmptySpot(Card card)
+    {
+        for (int j = 0; j < GameStats.Height; j++) {
+            for (int i = 0; i < GameStats.Width; i++) {
+                if (placedCards[i, j] != null) continue;
+
+                // Found an empty space
+                PlaceCard(card, i, j);
+                return true;
+            }
+        }
+        return false;
+    }
 }
