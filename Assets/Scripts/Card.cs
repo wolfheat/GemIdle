@@ -29,7 +29,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     public GameAreaPosition PlacedGameAreaPosition { get; internal set; } = new GameAreaPosition() { Pos = new Vector2Int(-1, -1) };
     public bool IsMultiplier => cardData is MultiplyCardData;
-    public int Multiplier => ((MultiplyCardData)cardData).BaseMultiplier;
+    public int Multiplier => currentMultiplier;
 
     public void UnsetPosition()
     {
@@ -194,9 +194,12 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         if (cardData is GainerCardData) {
 
             gainTextField.text = "+" + currentGain;
+        }else if (cardData is MultiplyCardData) {
+            gainTextField.text = "x " + currentMultiplier;
         }
         // Fill in the data onto the card from the datafile
-        descriptionText.text = "+" + currentIncome + "   <sprite name=" + cardData.Image.name + ">";
+        if(descriptionText != null)
+            descriptionText.text = "+" + currentIncome + "   <sprite name=" + cardData.Image.name + ">";
     }
 
     internal void DisableInPlay() => inPlay = false;
@@ -205,6 +208,11 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     public void MultiplyGainBy(int multiplier)
     {
         currentIncome *= multiplier;
+
+        Debug.Log("De setting Multiplier from "+ currentMultiplier+" * "+multiplier);
         currentMultiplier *= multiplier;
+        Debug.Log("De setting Multiplier to "+ currentMultiplier + " * " + multiplier);
+
+        UpdateTextsOnCard();
     }
 }

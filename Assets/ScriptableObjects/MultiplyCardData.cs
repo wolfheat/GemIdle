@@ -4,4 +4,6 @@
 public class MultiplyCardData : CardData
 {    
     public int BaseMultiplier;
+
+    public int CurrentMultiplier { get; internal set; }
 }
