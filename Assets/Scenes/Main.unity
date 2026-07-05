@@ -8783,6 +8783,12 @@ MonoBehaviour:
     loop: 0
     audioSource: {fileID: 0}
     name: 8
+  - clip: {fileID: 8300000, guid: c3a060e935f6a6b46a800c6e8775fb4b, type: 3}
+    volume: 0.703
+    pitch: 1.127
+    loop: 0
+    audioSource: {fileID: 0}
+    name: 9
   effects: []
   musics:
   - clip: {fileID: 8300000, guid: 2083aa75fabd547478d8ab635945f6e7, type: 3}

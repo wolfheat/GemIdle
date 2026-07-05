@@ -191,7 +191,7 @@ public class GameController : MonoBehaviour
         if (!mimicCard.IsMultiplier && !placedCard.IsMultiplier) return false;
 
         if (placedCard.IsMultiplier) {
-            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
+            GameAreaController.Instance.SwapCards(mimicCard, placedCard, false);
             (placedCard,mimicCard) = (mimicCard,placedCard);
         } 
 
@@ -204,6 +204,8 @@ public class GameController : MonoBehaviour
             int multiplier = mimicCard.Multiplier;
 
             placedCard.MultiplyGainBy(multiplier);
+
+            SoundMaster.Instance.PlaySound(SoundName.MergeCards);
 
             // Remove The Card
             RemoveCard(mimicCard);

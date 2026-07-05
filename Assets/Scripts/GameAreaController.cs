@@ -59,7 +59,7 @@ public class GameAreaController : MonoBehaviour
         }
     }
 
-    internal void SwapCards(Card mimicedCard, Card targetCard)
+    internal void SwapCards(Card mimicedCard, Card targetCard, bool playSound = true)
     {
         Vector2Int fromPos = mimicedCard.PlacedGameAreaPosition.Pos;
         Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
@@ -67,16 +67,17 @@ public class GameAreaController : MonoBehaviour
         if(fromPos.x == -1) {
             // Card is coming from the hand
             InventoryController.Instance.PlaceCard(targetCard, false);
-            PlaceCard(mimicedCard, toPos.x, toPos.y, false);
+            PlaceCard(mimicedCard, toPos.x, toPos.y, false, playSound);
         }
         else {
-            PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
-            PlaceCard(targetCard, fromPos.x, fromPos.y ,false);
+            PlaceCard(mimicedCard, toPos.x, toPos.y ,false, playSound);
+            PlaceCard(targetCard, fromPos.x, fromPos.y ,false, playSound);
         }
-        SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
+        if(playSound)
+            SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
     }
 
-    internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true)
+    internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true, bool playSound = true)
     {
         // Unset its old position?  Not needed if only reference to it is it being a child - might change later
 
@@ -100,7 +101,8 @@ public class GameAreaController : MonoBehaviour
 
         placedCards[xPos, yPos] = mimicedCard;
 
-        SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
+        if(playSound)
+            SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
 
     }
 
