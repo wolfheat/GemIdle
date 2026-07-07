@@ -37,8 +37,6 @@ public class InventoryController : MonoBehaviour
             mimicedCard.transform.SetSiblingIndex(order);
         }
 
-
-
         // removes from GameArea if present there
         GameAreaController.Instance.RemoveOldPlacement(mimicedCard);
 
@@ -48,10 +46,6 @@ public class InventoryController : MonoBehaviour
         // Scale it to fit the Box
         RectTransform rect = mimicedCard.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(BoxWidth, BoxHeight);
-
-        if(unsetOldPosition) // This also acts as a determiner if the pickup sound should be heared or if its enought with the swap sound
-            SoundMaster.Instance.PlaySound(SoundName.PickupCard);
-
     }
 
     private int GetInventoryOrderByMousePosition()
@@ -83,6 +77,8 @@ public class InventoryController : MonoBehaviour
     public void GenerateBlueGainCard() => GenerateRandomCard(GemType.Blue, 1);
 
     public void GenerateMultCard() => GenerateRandomCard(GemType.Neutral,0);
+    public void GenerateMoveRightCard() => GenerateRandomCard(GemType.Neutral,1);
+    public void GenerateAddCard() => GenerateRandomCard(GemType.Neutral,2);
 
 
     public void GenerateRandomCard(GemType type, int subType = 0)
@@ -97,13 +93,14 @@ public class InventoryController : MonoBehaviour
     private void GenerateCard(GemType type, int subType = 0)
     {
         Card card = ItemCreator.Instance.GenerateCard(type, subType);
+        if(card == null) {
+            Debug.Log("No Card Generated");
+            return;
+        }
+        Debug.Log("Generated a Card of type: "+type.ToString()+" and subtype: "+subType+" name: " + card.name); 
 
-        // Place Card in Inventroy -  Add it to the Holder - Also keep track of it?
-        card.transform.parent = itemHolder;
+        
 
-        // Scale it to fit the Box
-        RectTransform rect = card.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
-        rect.localScale = Vector2.one;
+        GameController.Instance.PlaceGeneratedCardInInventory(card);
     }
 }

@@ -175,8 +175,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 51.215893}
-  m_SizeDelta: {x: 180.9823, y: 41.327}
+  m_AnchoredPosition: {x: 43.2, y: 33.4432}
+  m_SizeDelta: {x: 56.1919, y: 13.9377}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5235039013491274416
 MonoBehaviour:
@@ -804,7 +804,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +35  <sprite name=RedGem>
+  m_text: 456644444445  <sprite name=RedGem>
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: def077e4414dd604a8b34df28ff90d09, type: 2}
   m_sharedMaterial: {fileID: 3014870588608968086, guid: def077e4414dd604a8b34df28ff90d09, type: 2}
@@ -831,12 +831,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.2
+  m_fontSize: 19.3
   m_fontSizeBase: 34.2
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 34
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -969,6 +969,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
   image: {fileID: 8310573548834793984}
+  border: {fileID: 8697373401824317571}
   descriptionText: {fileID: 4468704602129425289}
   inPlay: 1
   cardData: {fileID: 0}
@@ -1024,7 +1025,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -4, y: -4}
+  m_SizeDelta: {x: -6, y: -6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8924123640121443358
 CanvasRenderer:

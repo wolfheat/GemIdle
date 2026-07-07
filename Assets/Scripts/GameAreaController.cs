@@ -59,7 +59,7 @@ public class GameAreaController : MonoBehaviour
         }
     }
 
-    internal void SwapCards(Card mimicedCard, Card targetCard, bool playSound = true)
+    internal void SwapCards(Card mimicedCard, Card targetCard)
     {
         Vector2Int fromPos = mimicedCard.PlacedGameAreaPosition.Pos;
         Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
@@ -67,17 +67,15 @@ public class GameAreaController : MonoBehaviour
         if(fromPos.x == -1) {
             // Card is coming from the hand
             InventoryController.Instance.PlaceCard(targetCard, false);
-            PlaceCard(mimicedCard, toPos.x, toPos.y, false, playSound);
+            PlaceCard(mimicedCard, toPos.x, toPos.y, false);
         }
         else {
-            PlaceCard(mimicedCard, toPos.x, toPos.y ,false, playSound);
-            PlaceCard(targetCard, fromPos.x, fromPos.y ,false, playSound);
+            PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
+            PlaceCard(targetCard, fromPos.x, fromPos.y ,false);
         }
-        if(playSound)
-            SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
     }
 
-    internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true, bool playSound = true)
+    internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true)
     {
         // Unset its old position?  Not needed if only reference to it is it being a child - might change later
 
@@ -100,10 +98,6 @@ public class GameAreaController : MonoBehaviour
         mimicedCard.Place(xPos,yPos);
 
         placedCards[xPos, yPos] = mimicedCard;
-
-        if(playSound)
-            SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
-
     }
 
     public void RemoveOldPlacement(Card mimicedCard, bool unsetOldPosition = true)
@@ -121,6 +115,18 @@ public class GameAreaController : MonoBehaviour
     {
         // Evaluate all placed cards and calculate the total profit? Show increment on each card?
 
+        // Stage 1 - Do the Tick for each card
+        for (int j = 0; j < GameStats.Height; j++) {
+            for (int i = 0; i < GameStats.Width; i++) {
+                if (placedCards[i, j] == null)
+                    continue;
+
+                Card card = placedCards[i, j];
+                card.Tick();
+            }
+        }
+
+        // Stage 2 - Update All Texts - and animate if animation is enabled
         for (int j = 0; j < GameStats.Height; j++) {
             for (int i = 0; i < GameStats.Width; i++) {
                 if (placedCards[i, j] == null)
@@ -128,23 +134,23 @@ public class GameAreaController : MonoBehaviour
 
                 Card card = placedCards[i, j];
 
-                card.Tick();
+                card.UpdateTextsOnCard();
+
                 CardAnimator animator = card.GetComponent<CardAnimator>();
                 animator?.Animate();
-
-                Debug.Log("Gain Income from card on " + i + "," + j + " = " + card.GetIncomeGain());
 
                 GemType gemType = card.GemType();
 
                 Stats.AddGems(gemType, card.GetIncomeGain());
-
             }
         }
     }
 
     internal bool PositionHasOccupier(int x, int y) => placedCards[x, y] != null;
-    internal Card Occupier(int x, int y) => placedCards[x, y];
 
+    internal Card Occupier(int x, int y) => IndexOutsidePlacedCardsArray(x, y) ? null : placedCards[x, y];
+    private bool IndexOutsidePlacedCardsArray(int x, int y) => (x < 0 || x >= placedCards.GetLength(0) || y < 0 || y >= placedCards.GetLength(1));
+    
     internal bool PlaceCardOnFirstEmptySpot(Card card)
     {
         for (int j = 0; j < GameStats.Height; j++) {
@@ -157,5 +163,12 @@ public class GameAreaController : MonoBehaviour
             }
         }
         return false;
+    }
+
+    internal Card GetCardAt(Vector2Int pos)
+    {
+        if (IndexOutsidePlacedCardsArray(pos.x, pos.y))
+            return null;
+        return placedCards[pos.x, pos.y];
     }
 }

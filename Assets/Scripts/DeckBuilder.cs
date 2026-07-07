@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+public enum DeckBuilderAreaIndex { OwnedCards, CurrentDeck}
+
 public class DeckBuilder : MonoBehaviour
 {
     [SerializeField] private Transform deckHolder; 
@@ -61,24 +63,18 @@ public class DeckBuilder : MonoBehaviour
         for (int i = 0; i < currentDeck.Length; i++) {
             if (currentDeck[i] == 0) continue;
 
-            for (int amt = 0; amt < currentDeck[i]; amt++) {
+            DeckSleeve sleeve = Instantiate(deckbuilderCardSleevePrefab, deckHolder);
 
-                Debug.Log("Creating Deck Card "+i+ " out of " + currentDeck[i]);
+            sleeve.SetSleeveDataID(i, (int)DeckBuilderAreaIndex.CurrentDeck, currentDeck[i]);
 
-                DeckSleeve sleeve = Instantiate(deckbuilderCardSleevePrefab, deckHolder);
+            Card deckCard = ItemCreator.Instance.GenerateCard(i, false);
 
-                sleeve.SetSleeveDataID(i,1);
+            RectTransform rect = deckCard.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(DeckCardSize, DeckCardSize);
+            rect.localScale = Vector2.one;
 
-                Card deckCard = ItemCreator.Instance.GenerateCard(i, false);
-
-                RectTransform rect = deckCard.GetComponent<RectTransform>();
-                rect.sizeDelta = new Vector2(DeckCardSize, DeckCardSize);
-                rect.localScale = Vector2.one;
-
-                deckCard.transform.SetParent(deckHolder, false);
-                sleeve.transform.SetParent(deckCard.transform, false);
-            }
-            // Center the sleeve ontop of the card
+            deckCard.transform.SetParent(deckHolder, false);
+            sleeve.transform.SetParent(deckCard.transform, false);
         }
     }
 
@@ -106,7 +102,7 @@ public class DeckBuilder : MonoBehaviour
 
             int amtLeft = ownedCards[i]-currentDeck[i];
 
-            sleeve.SetSleeveDataID(i, 0, amtLeft);
+            sleeve.SetSleeveDataID(i, (int)DeckBuilderAreaIndex.OwnedCards, amtLeft);
 
             Debug.Log("Creating Owned Card "+i);
 

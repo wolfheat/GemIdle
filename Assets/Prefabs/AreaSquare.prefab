@@ -60,7 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 1}
+  m_Color: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -91,7 +91,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridPosition
   borderHighlight: {fileID: 8489801529370997908}
   borderHighlightColor: {r: 1, g: 0.9825959, b: 0.495283, a: 1}
-  normalColor: {r: 0.69803923, g: 0.69803923, b: 0.69803923, a: 1}
+  normalColor: {r: 0.29803923, g: 0.29803923, b: 0.29803923, a: 1}
 --- !u!1 &8956803149716999379
 GameObject:
   m_ObjectHideFlags: 0

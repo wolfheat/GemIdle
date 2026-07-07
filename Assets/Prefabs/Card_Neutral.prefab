@@ -890,7 +890,7 @@ GameObject:
   - component: {fileID: 1101850307970652322}
   - component: {fileID: 956132628169821568}
   m_Layer: 5
-  m_Name: Card_Multiplier
+  m_Name: Card_Neutral
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -969,6 +969,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
   image: {fileID: 8310573548834793984}
+  border: {fileID: 8697373401824317571}
   descriptionText: {fileID: 4468704602129425289}
   inPlay: 1
   cardData: {fileID: 0}

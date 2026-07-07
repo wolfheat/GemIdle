@@ -1,8 +1,16 @@
 using System;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
+
+public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge, AddMerge, AddImprint };
+
+public struct DropCardAction
+{
+    public CardAction action;
+    public Vector2Int dropPosition;
+    public Card targetCard;
+}
 
 public class GameController : MonoBehaviour
 {
@@ -121,91 +129,209 @@ public class GameController : MonoBehaviour
 		return localIndex;
     }
 
+
+
 	public void StopDrag()
-	{
-		if (mimicCard == null) {
-			Debug.Log("Stop Drag, no mimic Card issue....");
-			return;
-		}
+    {
+        if (mimicCard == null) return;
 
+        // Drag ghost should nolonger be visible
+        HideGhost();
 
-        // Request to stop dragging
-        ghostCard.gameObject.SetActive(false);
+        // Determine Drop Action
+        DropCardAction dropCardAction = DetermineDropAction();
+
+        // Execute it
+        ExecuteDropAction(dropCardAction);
+        
+        // Unset reference to any dragged card
+        mimicCard = null;
+
+    }
+    public void PlaceGeneratedCardInInventory(Card card)
+    {
+        mimicCard = card;
+        ExecuteDropAction(new DropCardAction() { action = CardAction.PlaceInventory });
+        mimicCard = null;
+    }
+
+    private void ExecuteDropAction(DropCardAction dropCardAction)
+    {
+        // Do Action
+        switch (dropCardAction.action) {
+            case CardAction.Invalid:
+                mimicCard?.ReactivateCard();
+                SoundMaster.Instance.PlaySound(SoundName.PlaceError);
+                break;
+            case CardAction.PlaceGameArea:
+                GameAreaController.Instance.PlaceCard(mimicCard, dropCardAction.dropPosition.x, dropCardAction.dropPosition.y);
+                SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
+                break;
+            case CardAction.PlaceInventory:
+                InventoryController.Instance.PlaceCard(mimicCard);
+                SoundMaster.Instance.PlaySound(SoundName.PickupCard);
+                break;
+            case CardAction.Swap:
+                GameAreaController.Instance.SwapCards(mimicCard, dropCardAction.targetCard);
+                SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
+                break;
+            case CardAction.Merge:
+                Merge(dropCardAction.targetCard, mimicCard);
+                SoundMaster.Instance.PlaySound(SoundName.MergeCards);
+                break;
+            case CardAction.AddMerge:
+                AddMerge(dropCardAction.targetCard, mimicCard);
+                SoundMaster.Instance.PlaySound(SoundName.MergeCards);
+                break;
+            case CardAction.AddImprint:
+                AddImprint(dropCardAction.targetCard, mimicCard);
+                SoundMaster.Instance.PlaySound(SoundName.MergeCards);
+                break;
+        }
+    }
+
+    private DropCardAction DetermineDropAction()
+    {
+        // From input Determine the action to be performed
+        //public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge };
+
+        // Stuff that determmines outcome
+
+        // Placement position Valid
+        // Placement position GameArea or Inventory
+        // Existing card at placement if GameArea
+        // Type Of cards moved and on target position
+
+        // All determines different sounds and actions
 
         Vector2Int localIndex = GetHighlightIndex();
 
-        //Debug.Log("Activate Card again");
+        // Get the card thats already placed at the target Index
+        Card placedCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y);
 
+        CardAction cardAction = CardAction.Invalid;
 
-        // Also need to handle invalid placement to unset the mimic
-        if (localIndex.x < 0 || localIndex.y < 0 || localIndex.x >= 7 || localIndex.y >= 5) {
-			// return Item its outside
-			//Debug.Log("Return Item its outside.");
-
-			if(localIndex.y >= 5) {
-				// Place the item back in inventory
-				Debug.Log("Place in Inventory + remove it from old position");
-                InventoryController.Instance.PlaceCard(mimicCard);
-			}
-			else {
-
-                SoundMaster.Instance.PlaySound(SoundName.PlaceError);
+        // Is there even a card dragged?
+        if (mimicCard == null) {
+            cardAction = CardAction.Invalid;
+        }
+        else if (OutsidePlayArea(localIndex)) { // Position Index Dropped
+            if (BelowPlayArea(localIndex)) {
+                cardAction = CardAction.PlaceInventory;
             }
-
-            // Move or return the mimicedCard 
-            mimicCard?.gameObject.SetActive(true);
-			return;
+            else {
+                cardAction = CardAction.Invalid;
+            }
+        }else if(placedCard == null) {
+            cardAction = CardAction.PlaceGameArea;
+        }
+        else if (mimicCard.PlacedGameAreaPosition.Pos.x == localIndex.x &&mimicCard.PlacedGameAreaPosition.Pos.y == localIndex.y) {
+            cardAction = CardAction.Invalid;
+        }
+        else if (CanAddMerge(placedCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
+            Debug.Log("Can Add Merge");
+            cardAction = CardAction.AddMerge;
+        }
+        else if (CanAddImprint(placedCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
+            Debug.Log("Can Add Imprint");
+            cardAction = CardAction.AddImprint;
+        }
+        else if (CanMerge(placedCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
+            Debug.Log("Can Merge");
+            cardAction = CardAction.Merge;
+        }
+        else {
+            cardAction = CardAction.Swap;
         }
 
-        // Move or return the mimicedCard 
-        mimicCard?.gameObject.SetActive(true);
-
-        if (mimicCard != null) {
-			Card placedCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y);
-
-			if (placedCard != null) {
-				if (CanMerge(placedCard, mimicCard)) {
-					// Merged
-                    return;
-				}
-                // SwapCards
-				GameAreaController.Instance.SwapCards(mimicCard, placedCard);
-            }
-			else {
-				GameAreaController.Instance.PlaceCard(mimicCard,localIndex.x,localIndex.y);
-            }
-        }
-		else {
-
-			Debug.Log("Mimic is NUll shouldnt reach here");
-		}
-		mimicCard = null;
+        return new DropCardAction() {dropPosition = localIndex, targetCard = placedCard, action = cardAction };
     }
 
-    private bool CanMerge(Card placedCard, Card mimicCard)
+
+    private bool CanAddMerge(Card placedCard, Card mimicCard) => (mimicCard.HasImprint && placedCard.IsIncomeCard) || (mimicCard.IsIncomeCard && placedCard.HasImprint);
+    private bool CanAddImprint(Card placedCard, Card mimicCard) => (mimicCard.IsAddCard && placedCard.IsIncomeCard) || (mimicCard.IsIncomeCard && placedCard.IsAddCard);
+    private bool CanMerge(Card placedCard, Card mimicCard) => (mimicCard.IsMultiplier || placedCard.IsMultiplier) && (mimicCard.AcceptsMerge && placedCard.AcceptsMerge);
+    
+    private void HideGhost() => ghostCard.gameObject.SetActive(false);
+
+    private static bool BelowPlayArea(Vector2Int localIndex)
+    {
+        return localIndex.y >= 5;
+    }
+
+    private static bool OutsidePlayArea(Vector2Int localIndex)
+    {
+        return localIndex.x < 0 || localIndex.y < 0 || localIndex.x >= 7 || localIndex.y >= 5;
+    }
+
+    private void Merge(Card placedCard, Card mimicCard)
     {
         // If this is a multiplier and merging with normal card the merge is more difficult
         // Might need to move the other card to this position and then apply the mult
-
-        // Case mimic is mult card
-        if (!mimicCard.IsMultiplier && !placedCard.IsMultiplier) return false;
+        Debug.Log("Merge "+mimicCard.name+" onto "+ placedCard);
 
         if (placedCard.IsMultiplier) {
-            GameAreaController.Instance.SwapCards(mimicCard, placedCard, false);
+            Debug.Log("Swap First");
+            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
             (placedCard,mimicCard) = (mimicCard,placedCard);
         } 
 
         ApplyMultToPlacedCard();
 
-        return true;
+        return;
 
         void ApplyMultToPlacedCard()
         {
             int multiplier = mimicCard.Multiplier;
 
-            placedCard.MultiplyGainBy(multiplier);
+            placedCard.MultiplyBy(multiplier);
 
-            SoundMaster.Instance.PlaySound(SoundName.MergeCards);
+            // Remove The Card
+            RemoveCard(mimicCard);
+        }
+    }
+
+    private void AddMerge(Card placedCard, Card mimicCard)
+    {
+        // Merge value is added to the Income card
+        if (mimicCard.IsIncomeCard) { // Place Income Card in the Target Position
+            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
+            (placedCard,mimicCard) = (mimicCard,placedCard);
+            Debug.Log("Swap Before Add Merging");
+        } 
+
+        ApplyAddonToPlacedCard();
+
+        return;
+
+        void ApplyAddonToPlacedCard()
+        {
+            int add = mimicCard.AddValue;
+
+            placedCard.AddToIncome(add); // Doesnt really multiply
+
+            // Remove The Card
+            RemoveCard(mimicCard);
+        }
+    }
+    
+    private void AddImprint(Card placedCard, Card mimicCard)
+    {
+        // Imprint is added to the Adder card
+        if (placedCard.IsIncomeCard) { // replace with adder
+            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
+            (placedCard,mimicCard) = (mimicCard,placedCard);
+        } 
+
+        ApplyAddonToPlacedCard();
+
+        return;
+
+        void ApplyAddonToPlacedCard()
+        {
+            int add = mimicCard.GetIncomeGain();
+
+            placedCard.MultiplyBy(add); // Doesnt really multiply
 
             // Remove The Card
             RemoveCard(mimicCard);

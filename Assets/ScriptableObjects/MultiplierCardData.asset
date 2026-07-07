@@ -16,4 +16,6 @@ MonoBehaviour:
   Description: Multiplier Card
   Image: {fileID: 21300000, guid: c3d2c4631e5328e4c9f320fcf094f00b, type: 3}
   baseIncome: 0
+  borderColor: {r: 0.681, g: 0.681, b: 0.681, a: 1}
+  AcceptsMerge: 1
   BaseMultiplier: 2

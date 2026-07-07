@@ -16,4 +16,6 @@ MonoBehaviour:
   Description: Gain +1 income each 5s
   Image: {fileID: 1276911414, guid: eba062bb2bee7ed40aa7e1774166ca6b, type: 3}
   baseIncome: 1
-  baseGain: 3
+  borderColor: {r: 0.18498755, g: 0, b: 1, a: 1}
+  AcceptsMerge: 1
+  BaseGain: 3

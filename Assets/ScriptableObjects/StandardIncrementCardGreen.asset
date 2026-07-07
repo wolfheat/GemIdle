@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a96f86dd9bb20b9408468609385d0e02, type: 3}
   m_Name: StandardIncrementCardGreen
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
-  effectType: 0
   type: 1
   Description: Increment Gems
   Image: {fileID: 1411777702, guid: eba062bb2bee7ed40aa7e1774166ca6b, type: 3}
   baseIncome: 10
+  borderColor: {r: 0, g: 0.5764706, b: 0.15351066, a: 1}
+  AcceptsMerge: 1

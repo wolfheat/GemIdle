@@ -29,6 +29,8 @@ Jun 2026
 		* Added multiplier cards
 		* Multipling works
 5/7		* Added MergeSound
+7/7		* Add Card added - First makes a Add Amount Card then it adds to any Income Card
+		
 
 		TODO:
 		* Add limitation when adding cards to the deck in the deckbuilder. 

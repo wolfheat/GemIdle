@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class BaseCard : MonoBehaviour
 {
     [SerializeField] protected Image image;
+    [SerializeField] protected Image border;
     [SerializeField] protected TextMeshProUGUI descriptionText;
         
     internal void Mimic(Card cardToDrag)

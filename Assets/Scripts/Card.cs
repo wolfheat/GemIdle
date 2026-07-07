@@ -26,16 +26,24 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     private int currentIncome = 0;
     private int currentGain = 0;
     private int currentMultiplier = 0;
+    private int currentMover = 0;
+    private int currentAddValue = 0;
 
     public GameAreaPosition PlacedGameAreaPosition { get; internal set; } = new GameAreaPosition() { Pos = new Vector2Int(-1, -1) };
     public bool IsMultiplier => cardData is MultiplyCardData;
+    public bool AcceptsMerge => cardData.AcceptsMerge;
+    public bool IsMover => cardData is MoverCardData;
+    public bool IsIncomeCard => currentIncome > 0;
+    public bool HasImprint => currentAddValue > 0;
+    public int AddValue => currentAddValue;
+    public bool IsAddCard => cardData is AddCardData;
     public int Multiplier => currentMultiplier;
 
     public void UnsetPosition()
     {
         GameAreaController.Instance.RemoveOldPlacement(this);
 
-        PlacedGameAreaPosition.Pos = new Vector2Int(-1, -1);
+        Place(-1, -1);
 
         if(gameObject.TryGetComponent(out CardAnimator animator))
             animator.ResetScale();
@@ -122,6 +130,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     {
         if (cardData == null) return;
 
+        border.color = cardData.borderColor;
+
         switch (cardData) {
             case GainerCardData:
                 currentGain = ((GainerCardData)cardData).BaseGain;
@@ -132,7 +142,19 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             case MultiplyCardData:
                 currentGain = 0;
                 currentMultiplier = ((MultiplyCardData)cardData).BaseMultiplier;
+                image.sprite = cardData.Image;
                 gainTextField.text = "x " + currentMultiplier;
+                break;
+            case MoverCardData:
+                currentMover = ((MoverCardData)cardData).BaseMover;
+                image.sprite = cardData.Image;
+                gainTextField.text = "" + currentMover;
+                break;
+            case AddCardData:
+                image.sprite = cardData.Image;
+                Debug.Log("GainTextField: "+gainTextField);
+                Debug.Log("GainTextField.text: "+gainTextField.text);
+                gainTextField.text = "";
                 break;
             default:
                 image.sprite = cardData.Image;
@@ -160,12 +182,18 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     internal void Place(int xPos, int yPos)
     {
+        if (!gameObject.activeSelf)
+            ReactivateCard();
+
         if (!inPlay) {
             // Do deckbuilding stuff here instead
             return;
         }
         PlacedGameAreaPosition.Pos = new Vector2Int(xPos, yPos);
+
     }
+
+    public void ReactivateCard() => gameObject.SetActive(true);
 
     internal void Tick()
     {
@@ -173,6 +201,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             // Do deckbuilding stuff here instead
             return;
         }
+
         // Tick updates the card to its new value, but does not send away the gain - gain is asked for later
         if (dotTimer != null) {
             if (dotTimer.Tick()) {
@@ -183,19 +212,35 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             }
         }
 
+        // If Mover
+        if (IsMover) {
+            // Get card to left and right if both can take a value do the move
+            Card prevCard = GameAreaController.Instance.GetCardAt(PlacedGameAreaPosition.Pos + Vector2Int.left);
+            Card nextCard = GameAreaController.Instance.GetCardAt(PlacedGameAreaPosition.Pos + Vector2Int.right);
+            
+            if(prevCard == null || nextCard == null)
+                return;
 
-        UpdateTextsOnCard();
-
+            if (prevCard.currentIncome > 0 && nextCard.currentIncome > 0) {
+                int movedAmt = Math.Min(prevCard.currentIncome, currentMover);
+                prevCard.currentIncome -= movedAmt;
+                nextCard.currentIncome += movedAmt;
+            }
+        }
 
     }
 
-    private void UpdateTextsOnCard()
+    public void UpdateTextsOnCard()
     {
         if (cardData is GainerCardData) {
 
             gainTextField.text = "+" + currentGain;
         }else if (cardData is MultiplyCardData) {
             gainTextField.text = "x " + currentMultiplier;
+        }else if (cardData is MoverCardData) {
+            gainTextField.text = "" + currentMover;
+        }else if (cardData is AddCardData) {
+            gainTextField.text = "" + (currentAddValue > 0 ? currentAddValue:"");
         }
         // Fill in the data onto the card from the datafile
         if(descriptionText != null)
@@ -204,15 +249,40 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     internal void DisableInPlay() => inPlay = false;
 
-
-    public void MultiplyGainBy(int multiplier)
+    public void MultiplyBy(int multiplier)
     {
-        currentIncome *= multiplier;
-
-        Debug.Log("De setting Multiplier from "+ currentMultiplier+" * "+multiplier);
-        currentMultiplier *= multiplier;
-        Debug.Log("De setting Multiplier to "+ currentMultiplier + " * " + multiplier);
-
+        Debug.Log("Applying Multiplier: "+multiplier);
+        if (cardData is GainerCardData) {
+            currentIncome *= multiplier;
+            currentMultiplier *= multiplier;
+            Debug.Log("Multiplying Gainer card");
+        }
+        else if (cardData is MultiplyCardData) {
+            currentMover *= multiplier;
+            currentMultiplier *= multiplier;
+            Debug.Log("Multiplying Multiply card");
+        }
+        else if (cardData is MoverCardData) {
+            currentMover *= multiplier;
+            Debug.Log("Multiplying Mover card");
+        }
+        else if (cardData is AddCardData) {
+            currentAddValue = multiplier;
+            Debug.Log("Setting the Add cards add value");
+        }
+        else {
+            currentIncome *= multiplier;
+            currentMultiplier *= multiplier;
+            Debug.Log("Multiplying Normal Card");
+        }
         UpdateTextsOnCard();
     }
+
+    public void AddToIncome(int addAmt)
+    {
+        Debug.Log("Add to Income "+addAmt);
+        currentIncome += addAmt;
+        UpdateTextsOnCard();
+    }
+
 }

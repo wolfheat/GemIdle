@@ -7,7 +7,7 @@ public class ItemCreator : MonoBehaviour
 {
     [SerializeField] private Card cardPrefab;
     [SerializeField] private Card gainercardPrefab;
-    [SerializeField] private Card multiplierPrefab;
+    [SerializeField] private Card neutralCardPrefab;
     
     [SerializeField] private CardData[] redCardDatas;
     [SerializeField] private CardData[] greenCardDatas;
@@ -42,6 +42,11 @@ public class ItemCreator : MonoBehaviour
     {
         CardData[] cardLibrary = GetLibraryByColor(gemColor);
 
+        if(cardLibrary.Length <= subType) {
+            Debug.Log("CardLibrary does not have this subtype");
+            return null;
+        }
+
         CardData data = cardLibrary[subType];
 
         return GenerateCard(data, inPlay = true);
@@ -57,7 +62,9 @@ public class ItemCreator : MonoBehaviour
                 card = Instantiate(gainercardPrefab);
                 break;
             case MultiplyCardData:
-                card = Instantiate(multiplierPrefab);
+            case MoverCardData:
+            case AddCardData:
+                card = Instantiate(neutralCardPrefab);
                 break;
             default:
                 card = Instantiate(cardPrefab);
