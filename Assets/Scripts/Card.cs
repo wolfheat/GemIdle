@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -61,8 +62,10 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        Debug.Log("Clicking Card: "+cardData.name);
         if (!inPlay) {
             // Do deckbuilding stuff here instead
+            Debug.Log("Card not in play: ");
             return;
         }
 
@@ -78,7 +81,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             }
             else {
                 if (InventoryController.Instance.CanAddCard()) {
-                    InventoryController.Instance.PlaceCard(this);
+                    InventoryController.Instance.PlaceCard(this,true,false);
                 }
                 else {
                     InfoPanel.Instance.ShowInfo("Inventory Full");
@@ -90,7 +93,6 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         Debug.Log("Start To Drag Item");
 
         isDragged = true;
-
 
         GameController.Instance?.StartDrag(this);
         // Hide this Item and show a copy of it on top of game that is dragged - if released in false position return it to original position
@@ -230,10 +232,17 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             if (prevCard.currentIncome > 0 && nextCard.currentIncome > 0) {
                 int movedAmt = Math.Min(prevCard.currentIncome, currentMover);
                 prevCard.currentIncome -= movedAmt;
+                if(prevCard.currentIncome <= 0) {
+                    prevCard.Kill();
+                }
                 nextCard.currentIncome += movedAmt;
             }
         }
+    }
 
+    private void Kill()
+    {
+        GameAreaController.Instance.ChangeToKilledCard(this);
     }
 
     public void UpdateTextsOnCard()
@@ -291,4 +300,20 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         UpdateTextsOnCard();
     }
 
+    internal void SetScale()
+    {
+        // Need to do this delayed
+
+        StartCoroutine(DelayedScale());
+    }
+
+    private IEnumerator DelayedScale()
+    {
+        yield return null;
+        // Scale it to fit the Box
+        RectTransform rect = GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
+        rect.localScale = Vector3.one;
+        Debug.Log("Scaling card to "+GameStats.BoxWidth+","+GameStats.BoxHeight);
+    }
 }

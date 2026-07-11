@@ -22,6 +22,10 @@ public static class Stats
     public static Action<GemType> GemUpdate;
     internal static int[] OwnedCards;
     internal static int[] CurrentDeck;
+
+    internal static Stack<int> Deck = new();
+    internal static Stack<int> Toss = new();
+
     internal static bool AnimateCards = false;
 
     public static bool IsPaused { get; internal set; }
@@ -41,12 +45,10 @@ public static class Stats
         OwnedCards[2] = 4;
         OwnedCards[3] = 2;
         OwnedCards[4] = 2;
-
-        CurrentDeck[0] = 1;
-        CurrentDeck[1] = 4;
-        CurrentDeck[2] = 1;
-
     }
+
+
+
 
     public static void AddGems(GemType type, int amt = 1)
     {
@@ -66,8 +68,6 @@ public static class Stats
             default:
                 return;
         }
-
-
     }
 
     internal static int GetGemAmount(GemType itemType)
@@ -82,5 +82,34 @@ public static class Stats
             default:
                 return 0;
         }
+    }
+
+    internal static void ScrambleDeckFromCurrentDeck()
+    {
+        Deck.Clear();
+        Toss.Clear();
+
+        // Testadd Toss pile cards
+        Toss.Push(1);
+        Toss.Push(2);
+        Toss.Push(3);
+
+        List<int> cards = new List<int>();
+
+        for (int i = 0; i < CurrentDeck.Length; i++) {
+            for (int j = 0; j < CurrentDeck[i]; j++) {
+                cards.Insert(UnityEngine.Random.Range(0, cards.Count), i);
+            }
+        }
+        Deck = new Stack<int>(cards);
+
+        if(Deck.Count == 0) {
+            Deck.Push(1);
+            Deck.Push(2);
+            Deck.Push(3);
+        }
+
+
+        // Could Use Fisher-Yates Shuffle if allowing many cards in the deck.
     }
 }

@@ -231,7 +231,7 @@ namespace Wolfheat.StartMenu
 
         private List<AudioSource> speechQueue = new List<AudioSource>();
 
-        public void PlaySound(SoundName name, bool allowInterupt= true)
+        public void PlaySound(SoundName name, bool allowInterupt = true)
         {
             //Debug.Log("Play Sound "+name);
             if (!soundSettings.GlobalMaster || !soundSettings.UseMaster || !soundSettings.UseSFX) return;

@@ -31,6 +31,8 @@ public class DeckBuilder : MonoBehaviour
 
     public void OnClose()
     {
+        // Store the Current Deck as the Deck being used
+        Stats.ScrambleDeckFromCurrentDeck();
 
         // Check if Current Deck is valid, if not ont close or ask to undo any changes
         PauseMenu.Instance.HideDeckbuilder();

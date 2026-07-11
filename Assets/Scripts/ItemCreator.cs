@@ -9,11 +9,13 @@ public class ItemCreator : MonoBehaviour
     [SerializeField] private Card cardPrefab;
     [SerializeField] private Card gainercardPrefab;
     [SerializeField] private Card neutralCardPrefab;
+    [SerializeField] private Card deadCardPrefab;
+    [SerializeField] private Card deckCardPrefab;
     
     [SerializeField] private CardData[] redCardDatas;
     [SerializeField] private CardData[] greenCardDatas;
     [SerializeField] private CardData[] blueCardDatas;
-    [SerializeField] private CardData[] blackCardDatas;
+    [SerializeField] private CardData[] neutralCardDatas;
     private CardData[] cardLibrary;
 
     public static ItemCreator Instance { get; private set; }
@@ -33,7 +35,7 @@ public class ItemCreator : MonoBehaviour
         Instance = this;
 
         // Make a List of all cards and give them an ID
-        cardLibrary = redCardDatas.Concat(greenCardDatas).Concat(blueCardDatas).Concat(blackCardDatas).ToArray();
+        cardLibrary = redCardDatas.Concat(greenCardDatas).Concat(blueCardDatas).Concat(neutralCardDatas).ToArray();
 
         // Build the DictionaryLookup for cards
         for (int i = 0; i < cardLibrary.Length; i++) {
@@ -41,6 +43,14 @@ public class ItemCreator : MonoBehaviour
         }
 
     }
+
+    public Card GenerateDeckCard(bool isActive = true)
+    {
+        Card card = Instantiate(deckCardPrefab);
+        return card;
+    }
+
+    public Card GenerateDeadCard(bool isActive = true) => GenerateCard(GemType.Neutral, 3, isActive);
 
     public Card GenerateCard(int cardID, bool inPlay = true)
     {
@@ -60,7 +70,7 @@ public class ItemCreator : MonoBehaviour
         CardData[] cardLibrary = GetLibraryByColor(gemColor);
 
         if(cardLibrary.Length <= subType) {
-            Debug.Log("CardLibrary does not have this subtype");
+            Debug.Log("CardLibrary does not have this subtype:  Library: "+gemColor+" subType: "+subType);
             return null;
         }
 
@@ -82,6 +92,9 @@ public class ItemCreator : MonoBehaviour
             case MoverCardData:
             case AddCardData:
                 card = Instantiate(neutralCardPrefab);
+                break;
+            case DeadCardData:
+                card = Instantiate(deadCardPrefab);
                 break;
             default:
                 card = Instantiate(cardPrefab);
@@ -109,7 +122,7 @@ public class ItemCreator : MonoBehaviour
             GemType.Red => redCardDatas,
             GemType.Green => greenCardDatas,
             GemType.Blue => blueCardDatas,
-            GemType.Neutral => blackCardDatas,
+            GemType.Neutral => neutralCardDatas,
             _ => redCardDatas
         };
     }

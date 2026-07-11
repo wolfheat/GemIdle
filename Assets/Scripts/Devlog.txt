@@ -32,17 +32,13 @@ Jun 2026
 7/7		* Add Card added - First makes a Add Amount Card then it adds to any Income Card
 8/7-10/7* UI style changed, 
 		* Implemented a drawPile ingame
+		* Card Limit added for valid deck size
+11/7	* Fixed rightclick return to inventory ordering
+		* Make the Drawn cards use the active deck, and add a toss pile
+		* DrawDeckSystem Implemented
 
-		TODO:
-		* Add limitation when adding cards to the deck in the deckbuilder. 
-			* Need at least 10 cards to be valid
-			* Can only add the cards you own
-			* Maybe have saved decks that you can reload fast when needed
-
-		* Moving items on top of a placed item should swap it into inventory?
-
-		* Make Clicking Gem animate it - should be used for gaining gems later
-
+		TODO
+		* 
 
 		LAST CHECK
 

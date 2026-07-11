@@ -49,6 +49,7 @@ public class GameAreaController : MonoBehaviour
         }
     }
 
+    internal void NoHighlight() => HighlightSlot(-1, -1);
     internal void HighlightSlot(int xPos, int yPos)
     {
 
@@ -97,7 +98,10 @@ public class GameAreaController : MonoBehaviour
 
         mimicedCard.Place(xPos,yPos);
 
+        mimicedCard.SetScale();
+
         placedCards[xPos, yPos] = mimicedCard;
+
     }
 
     public void RemoveOldPlacement(Card mimicedCard, bool unsetOldPosition = true)
@@ -170,5 +174,18 @@ public class GameAreaController : MonoBehaviour
         if (IndexOutsidePlacedCardsArray(pos.x, pos.y))
             return null;
         return placedCards[pos.x, pos.y];
+    }
+
+    internal void ChangeToKilledCard(Card card)
+    {
+        // Swap this card for a dead one
+        Vector2Int cardsPosition = card.PlacedGameAreaPosition.Pos;
+
+        Card deadCard = ItemCreator.Instance.GenerateDeadCard();
+        //deadCard.Place(cardsPosition.x,cardsPosition.y);
+
+        PlaceCard(deadCard,cardsPosition.x,cardsPosition.y);
+
+        Destroy(card.gameObject);
     }
 }

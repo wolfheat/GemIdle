@@ -36,8 +36,13 @@ public class GameController : MonoBehaviour
 		//Initiate Stats
 		Stats.Initiate();
 
+        DealNewDeck();
     }
 
+    private void DealNewDeck()
+    {
+        Stats.ScrambleDeckFromCurrentDeck();
+    }
 
     private void Update()
     {
@@ -84,7 +89,7 @@ public class GameController : MonoBehaviour
     public void StartDrag(Card cardToDrag)
 	{
 		// Request to start Dragging this card
-		//Debug.Log("Mouse pressed: [" + Mouse.current.position.ReadValue().x+"," + Mouse.current.position.ReadValue().y + "]");
+		Debug.Log("Mouse pressed: [" + Mouse.current.position.ReadValue().x+"," + Mouse.current.position.ReadValue().y + "] Starting to drag "+cardToDrag.name);
 
 		
 		//ghostCard.gameObject.SetActive(true);
@@ -189,6 +194,7 @@ public class GameController : MonoBehaviour
                 SoundMaster.Instance.PlaySound(SoundName.MergeCards);
                 break;
         }
+        GameAreaController.Instance.NoHighlight();
     }
 
     private DropCardAction DetermineDropAction()

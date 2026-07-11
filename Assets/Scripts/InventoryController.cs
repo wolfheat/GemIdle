@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
@@ -12,7 +11,7 @@ public class InventoryController : MonoBehaviour
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
 
-    public const int MaxChildren = 12;
+    public const int MaxCardsInInventory = 12;
 
     private GridPosition[,] gridPositions;
     //private Card[,] gridcards;
@@ -48,9 +47,7 @@ public class InventoryController : MonoBehaviour
         // Make the card forget its placement as well - Need to happen after
         mimicedCard.UnsetPosition();
 
-        // Scale it to fit the Box
-        RectTransform rect = mimicedCard.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(BoxWidth, BoxHeight);
+        mimicedCard.SetScale();
     }
 
     private int GetInventoryOrderByMousePosition()
@@ -73,7 +70,8 @@ public class InventoryController : MonoBehaviour
 
     public void DrawDeckCard()
     {
-        if (InventoryController.Instance.CanAddCard()) {
+        if (!InventoryController.Instance.CanAddCard()) {
+            InfoPanel.Instance.ShowInfo("Inventory Full.");
             SoundMaster.Instance.PlaySound(SoundName.PlaceError);
             return;
         } 
@@ -93,7 +91,7 @@ public class InventoryController : MonoBehaviour
         int randomCard = UnityEngine.Random.Range(0, cardIds.Count);
 
 
-        Card card = ItemCreator.Instance.GenerateCard(randomCard, false);
+        Card card = ItemCreator.Instance.GenerateCard(randomCard, true);
 
         GameController.Instance.PlaceGeneratedCardInInventory(card);
 
@@ -115,7 +113,7 @@ public class InventoryController : MonoBehaviour
 
     public void GenerateRandomCard(GemType type, int subType = 0)
     {
-        if(HeldItems >= MaxChildren) {
+        if(HeldItems >= MaxCardsInInventory) {
             InfoPanel.Instance.ShowInfo("Inventory Full");
             SoundMaster.Instance.PlaySound(SoundName.PlaceError);
             return;
@@ -144,5 +142,10 @@ public class InventoryController : MonoBehaviour
         GameController.Instance.PlaceGeneratedCardInInventory(card);
     }
 
-    internal bool CanAddCard() => (HeldItems < MaxChildren);
+    internal bool CanAddCard()
+    {
+
+        Debug.Log("Cant add the Card, HeldItems:"+ HeldItems+ " and MaxCardsInInventory: "+ MaxCardsInInventory);
+        return (HeldItems < MaxCardsInInventory);
+    }
 }
