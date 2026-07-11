@@ -161,6 +161,7 @@ public class GameController : MonoBehaviour
         switch (dropCardAction.action) {
             case CardAction.Invalid:
                 mimicCard?.ReactivateCard();
+                InfoPanel.Instance.ShowInfo("Invalid Action.");
                 SoundMaster.Instance.PlaySound(SoundName.PlaceError);
                 break;
             case CardAction.PlaceGameArea:
@@ -217,7 +218,10 @@ public class GameController : MonoBehaviour
         }
         else if (OutsidePlayArea(localIndex)) { // Position Index Dropped
             if (BelowPlayArea(localIndex)) {
-                cardAction = CardAction.PlaceInventory;
+                if(InventoryController.Instance.CanAddCard())
+                    cardAction = CardAction.PlaceInventory;
+                else
+                    cardAction = CardAction.Invalid;
             }
             else {
                 cardAction = CardAction.Invalid;

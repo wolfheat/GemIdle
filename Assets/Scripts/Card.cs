@@ -15,10 +15,8 @@ public class GameAreaPosition
 public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField] private bool inPlay = true;
-    [SerializeField] private CardData cardData;
-    
+    [SerializeField] private CardData cardData;    
     [SerializeField] private DotTimer dotTimer;
-
     [SerializeField] private TextMeshProUGUI gainTextField;
     
     private bool isDragged = false;
@@ -73,11 +71,18 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
                 Debug.Log("Card in inventory, on Right click, try to place it on first Empty space");
                 // Maybe place it on first available empty spot?
                 bool canPlace = GameAreaController.Instance.PlaceCardOnFirstEmptySpot(this);
-                if (!canPlace)
+                if (!canPlace) {
+                    InfoPanel.Instance.ShowInfo("Play Area is Full, Can not place item.");
                     SoundMaster.Instance.PlaySound(SoundName.PlaceError);
+                }
             }
             else {
-                InventoryController.Instance.PlaceCard(this);
+                if (InventoryController.Instance.CanAddCard()) {
+                    InventoryController.Instance.PlaceCard(this);
+                }
+                else {
+                    InfoPanel.Instance.ShowInfo("Inventory Full");
+                }
             }
             return;
         }
@@ -131,6 +136,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         if (cardData == null) return;
 
         border.color = cardData.borderColor;
+        backgroundImage.color = cardData.BackgroundSpriteColor;
 
         switch (cardData) {
             case GainerCardData:

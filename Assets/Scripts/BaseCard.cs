@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class BaseCard : MonoBehaviour
 {
     [SerializeField] protected Image image;
+    [SerializeField] protected Image backgroundImage;
     [SerializeField] protected Image border;
     [SerializeField] protected TextMeshProUGUI descriptionText;
         

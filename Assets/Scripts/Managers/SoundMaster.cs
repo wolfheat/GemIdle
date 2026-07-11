@@ -101,6 +101,8 @@ namespace Wolfheat.StartMenu
         AudioSource stepSource;
         AudioSource getHitSource;
 
+        public bool IsMusicOn => musicSource.isPlaying;
+
         SoundSettings soundSettings = new SoundSettings();
 
         public Action GlobalMuteChanged;

@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 
 public enum DeckBuilderAreaIndex { OwnedCards, CurrentDeck}
@@ -9,9 +11,12 @@ public class DeckBuilder : MonoBehaviour
     [SerializeField] private Transform deckHolder; 
     [SerializeField] private Transform ownedCardHolder;
     [SerializeField] private DeckSleeve deckbuilderCardSleevePrefab;
+    [SerializeField] private TextMeshProUGUI heldCardsText;
+    [SerializeField] private GameObject okButton;
 
     private const int DeckCardSize = 120;
-
+    private const int DeckCardstackOffset = 6;
+    private const int MinCardsPerDeckAllowed = 15;
 
     public static DeckBuilder Instance { get; private set; }
 
@@ -26,6 +31,7 @@ public class DeckBuilder : MonoBehaviour
 
     public void OnClose()
     {
+
         // Check if Current Deck is valid, if not ont close or ask to undo any changes
         PauseMenu.Instance.HideDeckbuilder();
     }
@@ -53,64 +59,74 @@ public class DeckBuilder : MonoBehaviour
 
     private void FillCurrentDeckCards()
     {
-
         // Destroy Old Area
         foreach (Transform t in deckHolder) {
             Destroy(t.gameObject);
         }
 
+        int sumCards = Stats.CurrentDeckCards;
+        int[] currentDeck = Stats.CurrentDeck;
 
         for (int i = 0; i < currentDeck.Length; i++) {
             if (currentDeck[i] == 0) continue;
-
+            
             DeckSleeve sleeve = Instantiate(deckbuilderCardSleevePrefab, deckHolder);
 
             sleeve.SetSleeveDataID(i, (int)DeckBuilderAreaIndex.CurrentDeck, currentDeck[i]);
+            int cardsToShow = Math.Min(3, currentDeck[i]);
 
-            Card deckCard = ItemCreator.Instance.GenerateCard(i, false);
+            Debug.Log("Creating Deck Card " + i + " Amt: " + cardsToShow);
 
-            RectTransform rect = deckCard.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(DeckCardSize, DeckCardSize);
-            rect.localScale = Vector2.one;
-
-            deckCard.transform.SetParent(deckHolder, false);
-            sleeve.transform.SetParent(deckCard.transform, false);
+            for (int j =  cardsToShow - 1; j >= 0; j--) {
+                CreateDeckBuilderCard(i, sleeve, j);
+            }
+            //sleeve.transform.SetParent(deckCard.transform, false);
         }
+
+        // Show Cards Amount
+        heldCardsText.text = "Cards: " + sumCards;
     }
 
-    private int[] ownedCards;
-    private int[] currentDeck;
 
     private void FillOwnedCards()
     {
-
         // Destroy Old Area
         foreach (Transform t in ownedCardHolder) {
             Destroy(t.gameObject);
         }
 
         Debug.Log("FillOwnedCards");
-
-        ownedCards = Stats.OwnedCards;
+                
+        int[] ownedCards = Stats.OwnedCards;
+        int[] currentDeck = Stats.CurrentDeck;
 
         for (int i = 0; i < ownedCards.Length; i++) {
-            if (ownedCards[i] == 0) continue;
-
-            DeckSleeve sleeve = Instantiate(deckbuilderCardSleevePrefab, deckHolder);
-
-            // Add data to sleeve in ownedcards to show multiples amt
-
             int amtLeft = ownedCards[i]-currentDeck[i];
+            if (amtLeft == 0) continue;
 
+            DeckSleeve sleeve = Instantiate(deckbuilderCardSleevePrefab, ownedCardHolder);
             sleeve.SetSleeveDataID(i, (int)DeckBuilderAreaIndex.OwnedCards, amtLeft);
 
-            Debug.Log("Creating Owned Card "+i);
+            int cardsToShow = Math.Min(3, amtLeft);
 
-            Card ownedCard = ItemCreator.Instance.GenerateCard(i, false);
+            Debug.Log("Creating Owned Card "+i+" Amt: "+amtLeft);
 
-            ownedCard.transform.SetParent(ownedCardHolder,false);
-            sleeve.transform.SetParent(ownedCard.transform, false);
+            for (int j = cardsToShow - 1; j >= 0; j--) {
+                CreateDeckBuilderCard(i, sleeve, j);
+            }
         }
+    }
+
+    private static void CreateDeckBuilderCard(int i, DeckSleeve sleeve, int j)
+    {
+        Card deckCard = ItemCreator.Instance.GenerateCard(i, false);
+
+        RectTransform rect = deckCard.GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(DeckCardSize, DeckCardSize);
+        rect.localScale = Vector2.one;
+
+        deckCard.transform.SetParent(sleeve.CardHolder, false);
+        deckCard.transform.localPosition = new Vector2(-DeckCardstackOffset * j, DeckCardstackOffset * j);
     }
 
     public void ClickingCard(int ID, int HolderID)
@@ -145,13 +161,10 @@ public class DeckBuilder : MonoBehaviour
 
     private void UpdateDeckbuilder()
     {
-
-        currentDeck = Stats.CurrentDeck;
-
-        ownedCards = Stats.OwnedCards;
-
         FillOwnedCards();
-
         FillCurrentDeckCards();
+
+        // Determine if the deck is valid        
+        okButton.SetActive((Stats.CurrentDeckCards >= MinCardsPerDeckAllowed));
     }
 }

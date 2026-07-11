@@ -17,4 +17,5 @@ MonoBehaviour:
   Image: {fileID: 1276911414, guid: eba062bb2bee7ed40aa7e1774166ca6b, type: 3}
   baseIncome: 2
   borderColor: {r: 0.18498755, g: 0, b: 1, a: 1}
+  BackgroundSpriteColor: {r: 0.08235294, g: 0, b: 0.45490196, a: 1}
   AcceptsMerge: 1

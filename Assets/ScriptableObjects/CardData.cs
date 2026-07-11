@@ -14,5 +14,6 @@ public class CardData : ScriptableObject
     public Sprite Image;
     public int baseIncome;
     public Color borderColor;
+    public Color BackgroundSpriteColor;
     public bool AcceptsMerge = true;
 }

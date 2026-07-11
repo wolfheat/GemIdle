@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 public enum GemType { Red, Green, Blue , Neutral}
 
@@ -23,20 +25,27 @@ public static class Stats
     internal static bool AnimateCards = false;
 
     public static bool IsPaused { get; internal set; }
+    public static int CurrentDeckCards => CurrentDeck.Sum();
 
     public static void Initiate()
     {
         Debug.Log("Stats Initiate");
-        int totalAmtCards = Enum.GetValues(typeof(CardDataType)).Length;
+        int totalAmtCards = ItemCreator.Instance.TotalCardAmount();
+
 
         // Initiate the Card Owned Array - Later load this from file
         OwnedCards = new int[totalAmtCards];
         CurrentDeck = new int[totalAmtCards];
-        OwnedCards[0] = 2;
-        OwnedCards[1] = 2;
-        OwnedCards[2] = 3;
+        OwnedCards[0] = 5;
+        OwnedCards[1] = 4;
+        OwnedCards[2] = 4;
+        OwnedCards[3] = 2;
+        OwnedCards[4] = 2;
 
+        CurrentDeck[0] = 1;
+        CurrentDeck[1] = 4;
         CurrentDeck[2] = 1;
+
     }
 
     public static void AddGems(GemType type, int amt = 1)

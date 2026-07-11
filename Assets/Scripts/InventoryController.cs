@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
@@ -10,10 +12,14 @@ public class InventoryController : MonoBehaviour
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
 
+    public const int MaxChildren = 12;
+
     private GridPosition[,] gridPositions;
     //private Card[,] gridcards;
     
     [SerializeField] private Transform itemHolder;
+
+    public int HeldItems => itemHolder.transform.childCount;
 
     public static InventoryController Instance { get; private set; }
 
@@ -28,7 +34,6 @@ public class InventoryController : MonoBehaviour
         
     internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true, bool useMousePositionToOrder = true)
     {
-
         // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
         mimicedCard.transform.parent = itemHolder;
         
@@ -37,7 +42,7 @@ public class InventoryController : MonoBehaviour
             mimicedCard.transform.SetSiblingIndex(order);
         }
 
-        // removes from GameArea if present there
+        // Removes from GameArea if present there
         GameAreaController.Instance.RemoveOldPlacement(mimicedCard);
 
         // Make the card forget its placement as well - Need to happen after
@@ -55,8 +60,7 @@ public class InventoryController : MonoBehaviour
         int finalIndex = 0;
         for (int i = 0; i < itemHolder.childCount; i++) {
             GameObject child = itemHolder.GetChild(i).gameObject;
-            Debug.Log("Child: "+i+" Name:" + child.name +  " Active: "+child.activeSelf);
-
+            
             if (!child.activeSelf) {
                 continue;
             }
@@ -65,6 +69,34 @@ public class InventoryController : MonoBehaviour
             finalIndex++;
         }
         return itemHolder.childCount;
+    }
+
+    public void DrawDeckCard()
+    {
+        if (InventoryController.Instance.CanAddCard()) {
+            SoundMaster.Instance.PlaySound(SoundName.PlaceError);
+            return;
+        } 
+
+
+        // Get Random Card in Deck
+        int[] currentDeck = Stats.CurrentDeck;
+
+        List<int> cardIds = new();
+
+        for (int i = 0; i < currentDeck.Length; i++) {
+            for (int j = 0; j < currentDeck[i]; j++) {
+                cardIds.Add(i);
+            }
+        }
+
+        int randomCard = UnityEngine.Random.Range(0, cardIds.Count);
+
+
+        Card card = ItemCreator.Instance.GenerateCard(randomCard, false);
+
+        GameController.Instance.PlaceGeneratedCardInInventory(card);
+
     }
 
     public void GenerateRedCard() => GenerateRandomCard(GemType.Red);
@@ -83,8 +115,15 @@ public class InventoryController : MonoBehaviour
 
     public void GenerateRandomCard(GemType type, int subType = 0)
     {
-        // Play sound for button
+        if(HeldItems >= MaxChildren) {
+            InfoPanel.Instance.ShowInfo("Inventory Full");
+            SoundMaster.Instance.PlaySound(SoundName.PlaceError);
+            return;
+        }
 
+
+
+        // Play sound for button
         SoundMaster.Instance.PlaySound(SoundName.ButtonClick);
 
         GenerateCard(type, subType);
@@ -92,6 +131,7 @@ public class InventoryController : MonoBehaviour
 
     private void GenerateCard(GemType type, int subType = 0)
     {
+        Debug.Log("GenerateCard "+type);
         Card card = ItemCreator.Instance.GenerateCard(type, subType);
         if(card == null) {
             Debug.Log("No Card Generated");
@@ -103,4 +143,6 @@ public class InventoryController : MonoBehaviour
 
         GameController.Instance.PlaceGeneratedCardInInventory(card);
     }
+
+    internal bool CanAddCard() => (HeldItems < MaxChildren);
 }

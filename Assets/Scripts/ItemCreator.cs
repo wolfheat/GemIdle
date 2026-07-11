@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 public enum CardDataType {RedGemGain, GreenGemGain, BlueGemGain };
@@ -17,6 +18,12 @@ public class ItemCreator : MonoBehaviour
 
     public static ItemCreator Instance { get; private set; }
 
+    private Dictionary<int, CardData> cardDictionary = new();
+    
+    public CardData GetCardDataByIndex(int value) => cardDictionary[value];
+    public int TotalCardAmount() => cardDictionary.Keys.Count;
+
+    
     private void Awake()
     {
         if (Instance != null) {
@@ -28,13 +35,23 @@ public class ItemCreator : MonoBehaviour
         // Make a List of all cards and give them an ID
         cardLibrary = redCardDatas.Concat(greenCardDatas).Concat(blueCardDatas).Concat(blackCardDatas).ToArray();
 
+        // Build the DictionaryLookup for cards
+        for (int i = 0; i < cardLibrary.Length; i++) {
+            cardDictionary[i] = cardLibrary[i];
+        }
+
     }
 
     public Card GenerateCard(int cardID, bool inPlay = true)
     {
-        if(cardLibrary.Length>cardID && cardLibrary[cardID] != null)
+        Debug.Log("Generate card "+cardID);
+
+        if(cardID < cardLibrary.Length && cardLibrary[cardID] != null) {
+            //Debug.Log("Generated Card Type "+cardID);
             return GenerateCard(cardLibrary[cardID], inPlay);
-        
+        }
+
+        Debug.Log("Generated Card Type was not founnd, making default");
         return GenerateCard(GemType.Red, 0, inPlay);
     }
 
