@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
 
-public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge, AddMerge, AddImprint };
+public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge, AddMerge, AddImprint, TossCard };
 
 public struct DropCardAction
 {
@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour
 	private Card mimicCard = null; 
 
 	public static GameController Instance { get; private set; }
+
 
 	private void Awake()
 	{
@@ -177,6 +178,11 @@ public class GameController : MonoBehaviour
                 InventoryController.Instance.PlaceCard(mimicCard);
                 SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 break;
+            case CardAction.TossCard:
+                Debug.Log("TOSSING CARD BY DRAGGING");
+                TossCard(mimicCard, false);
+                SoundMaster.Instance.PlaySound(SoundName.PickupCard);
+                break;
             case CardAction.Swap:
                 GameAreaController.Instance.SwapCards(mimicCard, dropCardAction.targetCard);
                 SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
@@ -229,6 +235,9 @@ public class GameController : MonoBehaviour
                 else
                     cardAction = CardAction.Invalid;
             }
+            else if (OverTossDeck(localIndex)) {
+                cardAction = CardAction.TossCard;                
+            }
             else {
                 cardAction = CardAction.Invalid;
             }
@@ -257,6 +266,7 @@ public class GameController : MonoBehaviour
         return new DropCardAction() {dropPosition = localIndex, targetCard = placedCard, action = cardAction };
     }
 
+    private bool OverTossDeck(Vector2Int localIndex) => DrawCardController.Instance.IsOverTossArea();
 
     private bool CanAddMerge(Card placedCard, Card mimicCard) => (mimicCard.HasImprint && placedCard.IsIncomeCard) || (mimicCard.IsIncomeCard && placedCard.HasImprint);
     private bool CanAddImprint(Card placedCard, Card mimicCard) => (mimicCard.IsAddCard && placedCard.IsIncomeCard) || (mimicCard.IsIncomeCard && placedCard.IsAddCard);
@@ -297,7 +307,7 @@ public class GameController : MonoBehaviour
             placedCard.MultiplyBy(multiplier);
 
             // Remove The Card
-            RemoveCard(mimicCard);
+            TossCard(mimicCard);
         }
     }
 
@@ -320,8 +330,8 @@ public class GameController : MonoBehaviour
 
             placedCard.AddToIncome(add); // Doesnt really multiply
 
-            // Remove The Card
-            RemoveCard(mimicCard);
+            // Remove The Card - Throw in TossPile
+            TossCard(mimicCard);
         }
     }
     
@@ -344,14 +354,16 @@ public class GameController : MonoBehaviour
             placedCard.MultiplyBy(add); // Doesnt really multiply
 
             // Remove The Card
-            RemoveCard(mimicCard);
+            TossCard(mimicCard);
         }
     }
 
-    private static void RemoveCard(Card mimicCard)
+    public static void TossCard(Card card, bool animate = true)
     {
-        // Later maybe move to dump for reuse
-        mimicCard.UnsetPosition();
-        Destroy(mimicCard.gameObject);
+        // Move to Toss
+        card.UnsetPosition();
+
+        // Store Card ID in tossPile
+        Stats.AddTossCard(card, animate); 
     }
 }

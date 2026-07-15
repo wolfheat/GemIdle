@@ -9,6 +9,7 @@ public enum EffectType { StandardIncrement, MultiplyBy, Gainer}
 public class CardData : ScriptableObject
 {
     //public EffectType effectType;
+    public int ID; // Set from Dictionary
     public GemType type;
     public string Description;
     public Sprite Image;

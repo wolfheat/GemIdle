@@ -36,6 +36,15 @@ Jun 2026
 11/7	* Fixed rightclick return to inventory ordering
 		* Make the Drawn cards use the active deck, and add a toss pile
 		* DrawDeckSystem Implemented
+14/7	* Made Drawpiles ordering and Display correctly
+15/7	* Removed animation when dragging a card to Tosspile
+
+
+		* If there is no toss cards, thene there is no option to shuffle them ?
+		* Should we have unique cards that only can appear once, and normal cards that can have duplicates?
+
+
+		* Make animations when placing Cards in draw pile toss and shuffle
 
 		TODO
 		* 

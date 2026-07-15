@@ -1,44 +1,99 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DrawCardController : MonoBehaviour
 {
     [SerializeField] private Transform DeckHolder;
     [SerializeField] private Transform TossHolder;
+    [SerializeField] private RectTransform TossArea;
 
-    private void UpdateDeckStack()
+    private GameObject[] drawPileVisuals = new GameObject[3];
+
+
+    public static DrawCardController Instance { get; private set; }
+
+    private void Awake()
     {
-        List<int> deckPile = new List<int>(Stats.Deck);
-        int amt = Math.Min(3, deckPile.Count);
-        int startIndex = amt - 3;
+        if (Instance != null) {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
+
+    private void OnEnable()
+    {
+        Stats.DrawDeckUpdated += FillDeckAndToss;
+    }
+    
+    private void OnDisable()
+    {
+        Stats.DrawDeckUpdated -= FillDeckAndToss;
+    }
+
+    private void Start()
+    {
+        // Initiate the Deck Pile, then just enable or disable the visuals of it
+        GenerateDeckVisuals();
+    }
+
+    private void GenerateDeckVisuals()
+    {
+        int amt = 3;
         int offsets = 3;
-        for (int i = startIndex; i < amt; i++) {
+        Debug.Log("Generate Deck Visuals to have " + amt + " cards.");
+        for (int i = 0; i < amt; i++) {
             offsets--;
-            if (i < 0) continue;
             Card BackSideCard = ItemCreator.Instance.GenerateDeckCard();
             BackSideCard.SetScale();
-            BackSideCard.transform.parent = DeckHolder;      
+            BackSideCard.transform.parent = DeckHolder;
             BackSideCard.transform.localScale = Vector3.one;
             BackSideCard.transform.localPosition = new Vector2(offsets * -8, offsets * 8);
             BackSideCard.enabled = false;
+            drawPileVisuals[offsets] = BackSideCard.gameObject;
+        }
+    }
+
+    private void UpdateDeckStackVisuals()
+    {
+        // Just show the correct parts of the visuals
+        int amt = Math.Min(3, Stats.Deck.Count);
+        
+        Debug.Log("Deck Visuals should show " + amt + " cards.");
+        
+        for (int i = 0; i < 3; i++) {
+            Debug.Log("Deck card " + i + " amt > (2-i) = " + (amt > (2 - i)));
+            drawPileVisuals[i].SetActive(amt > i ? true : false);
         }
     }
     
-    private void UpdateTossStack()
+    private void UpdateTossStackVisuals()
     {
+        RemoveOldCards();
         List<int> tossPile = new List<int>(Stats.Toss);
+        tossPile.Reverse();
+        Debug.Log("Updating TossPile cards: " + tossPile.Count);
         int amt = tossPile.Count;
         int startIndex = amt - 3;
         int offsets = 3;
         for (int i = startIndex; i < amt; i++) {
+            Debug.Log("Index: " + i+"  offsets:" + offsets);
             offsets--;
+            
             if (i < 0) continue;
-            Card card = GetTossCard(offsets, tossPile[i]);
+
+            Debug.Log("Index: " + i+"  Create Card!");
+
+            Card card = GetTossCardVisual(offsets, tossPile[i]);
         }
+
+        // If there is no toss cards, thene there is no option to shuffle them ? 
     }
 
-    private Card GetTossCard(int offsets, int type)
+    private Card GetTossCardVisual(int offsets, int type)
     {
         // Show the actiual cards, last3 thrown 3 2 1
         Card card = ItemCreator.Instance.GenerateCard(type, false); // Set as not in play
@@ -53,7 +108,12 @@ public class DrawCardController : MonoBehaviour
     public void DrawCard()
     {
         Debug.Log("Draw card.");
-        InventoryController.Instance.DrawDeckCard();
+        bool didShuffle = InventoryController.Instance.DrawDeckCard();
+
+        UpdateDeckStackVisuals();
+
+        if(didShuffle)
+            UpdateTossStackVisuals();
     }
     
     public void TossDeckClicked()
@@ -71,17 +131,31 @@ public class DrawCardController : MonoBehaviour
         RemoveOldCards();
 
         // Use players Card to fill the shown decks
-        UpdateDeckStack();
-        UpdateTossStack();
+        UpdateDeckStackVisuals();
+        UpdateTossStackVisuals();
     }
 
     private void RemoveOldCards()
     {
-        foreach (Transform child in DeckHolder.transform) {
-            Destroy(child.gameObject);
-        }
+        //foreach (Transform child in DeckHolder.transform) {
+        //    Destroy(child.gameObject);
+        //}
         foreach (Transform child in TossHolder.transform) {
             Destroy(child.gameObject);
         }
+    }
+
+    internal Vector2 GetTossPilePosition(bool animate) => TossHolder.transform.position;
+    internal bool IsOverTossArea()
+    {
+        Debug.Log("Checking if over Toss Area");
+        // TossArea is the Recttransform to check
+        // Return if mouse is over it
+        Vector2 mousePosition = Mouse.current.position.ReadValue();
+
+        return RectTransformUtility.RectangleContainsScreenPoint(
+            TossArea,
+            mousePosition
+        );
     }
 }

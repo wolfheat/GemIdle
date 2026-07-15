@@ -19,7 +19,8 @@ namespace Wolfheat.StartMenu
         PlaceError,
         PickupCard,
         DrawCard,
-        MergeCards
+        MergeCards, 
+        Shuffle
     }
 
     public enum MusicName {MenuMusic, OutDoorMusic, IndoorMusic, DeadMusic, CreditsMusic, BossMusic}

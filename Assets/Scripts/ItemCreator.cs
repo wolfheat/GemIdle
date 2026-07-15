@@ -40,6 +40,7 @@ public class ItemCreator : MonoBehaviour
         // Build the DictionaryLookup for cards
         for (int i = 0; i < cardLibrary.Length; i++) {
             cardDictionary[i] = cardLibrary[i];
+            cardLibrary[i].ID = i;
         }
 
     }

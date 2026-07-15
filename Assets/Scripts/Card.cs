@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Wolfheat.StartMenu;
@@ -20,6 +19,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     [SerializeField] private DotTimer dotTimer;
     [SerializeField] private TextMeshProUGUI gainTextField;
     
+    public const float MoveTime = 0.25f;
+
     private bool isDragged = false;
     
     private int currentIncome = 0;
@@ -37,6 +38,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     public int AddValue => currentAddValue;
     public bool IsAddCard => cardData is AddCardData;
     public int Multiplier => currentMultiplier;
+    public int ID => cardData.ID;
 
     public void UnsetPosition()
     {
@@ -82,9 +84,11 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             else {
                 if (InventoryController.Instance.CanAddCard()) {
                     InventoryController.Instance.PlaceCard(this,true,false);
+                    SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 }
                 else {
                     InfoPanel.Instance.ShowInfo("Inventory Full");
+                    SoundMaster.Instance.PlaySound(SoundName.PlaceError);
                 }
             }
             return;
@@ -260,6 +264,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         // Fill in the data onto the card from the datafile
         if(descriptionText != null)
             descriptionText.text = "+" + currentIncome + "   <sprite name=" + cardData.Image.name + ">";
+
     }
 
     internal void DisableInPlay() => inPlay = false;
@@ -290,7 +295,11 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             currentMultiplier *= multiplier;
             Debug.Log("Multiplying Normal Card");
         }
+
         UpdateTextsOnCard();
+
+        // Animate card at any Merging
+        GetComponent<CardAnimator>()?.ForcedAnimate();
     }
 
     public void AddToIncome(int addAmt)
@@ -316,4 +325,24 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         rect.localScale = Vector3.one;
         Debug.Log("Scaling card to "+GameStats.BoxWidth+","+GameStats.BoxHeight);
     }
+
+    internal void AnimateToPosition(Vector2 endPos, Action callback) => StartCoroutine(AnimateToPositionCO(endPos, callback));
+
+    private IEnumerator AnimateToPositionCO(Vector2 endPos, Action callback)
+    {
+        Vector2 startPos = transform.position;
+        
+        float moveTimer = 0f;
+
+        while (moveTimer < MoveTime) {
+            moveTimer += Time.deltaTime;
+            float fraction = moveTimer / MoveTime;
+            transform.position = Vector2.Lerp(startPos, endPos, fraction);
+            yield return null;
+        }
+
+        callback?.Invoke();
+    }
+
+    internal void Destroy() => Destroy(gameObject);
 }

@@ -68,33 +68,26 @@ public class InventoryController : MonoBehaviour
         return itemHolder.childCount;
     }
 
-    public void DrawDeckCard()
+    public bool DrawDeckCard()
     {
-        if (!InventoryController.Instance.CanAddCard()) {
+        if (!CanAddCard()) {
             InfoPanel.Instance.ShowInfo("Inventory Full.");
             SoundMaster.Instance.PlaySound(SoundName.PlaceError);
-            return;
-        } 
-
-
-        // Get Random Card in Deck
-        int[] currentDeck = Stats.CurrentDeck;
-
-        List<int> cardIds = new();
-
-        for (int i = 0; i < currentDeck.Length; i++) {
-            for (int j = 0; j < currentDeck[i]; j++) {
-                cardIds.Add(i);
-            }
+            return false;
         }
 
-        int randomCard = UnityEngine.Random.Range(0, cardIds.Count);
+        int cardIdOfDrawnCard = Stats.DrawTopCard();
 
+        // Only Draw Card if there is One
+        if(cardIdOfDrawnCard >= 0) {
+            Card card = ItemCreator.Instance.GenerateCard(cardIdOfDrawnCard, true);
+            GameController.Instance.PlaceGeneratedCardInInventory(card);
+        }
 
-        Card card = ItemCreator.Instance.GenerateCard(randomCard, true);
-
-        GameController.Instance.PlaceGeneratedCardInInventory(card);
-
+        // Shuffle
+        bool didShuffle = Stats.ShuffleIfNeeded();
+        
+        return didShuffle;
     }
 
     public void GenerateRedCard() => GenerateRandomCard(GemType.Red);
@@ -144,8 +137,6 @@ public class InventoryController : MonoBehaviour
 
     internal bool CanAddCard()
     {
-
-        Debug.Log("Cant add the Card, HeldItems:"+ HeldItems+ " and MaxCardsInInventory: "+ MaxCardsInInventory);
         return (HeldItems < MaxCardsInInventory);
     }
 }
