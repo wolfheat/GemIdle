@@ -10,7 +10,9 @@ public class DrawCardController : MonoBehaviour
     [SerializeField] private RectTransform TossArea;
 
     private GameObject[] drawPileVisuals = new GameObject[3];
+    private Vector2[] drawPilePositions = new Vector2[3];
 
+    private Vector2 drawPileOffset = new Vector2(-8, 8);
 
     public static DrawCardController Instance { get; private set; }
 
@@ -51,9 +53,14 @@ public class DrawCardController : MonoBehaviour
             BackSideCard.SetScale();
             BackSideCard.transform.parent = DeckHolder;
             BackSideCard.transform.localScale = Vector3.one;
-            BackSideCard.transform.localPosition = new Vector2(offsets * -8, offsets * 8);
+            drawPilePositions[i] = offsets * drawPileOffset;
+
+            BackSideCard.transform.localPosition = drawPilePositions[i];
+
             BackSideCard.enabled = false;
-            drawPileVisuals[offsets] = BackSideCard.gameObject;
+            drawPileVisuals[i] = BackSideCard.gameObject;
+
+            //BackSideCard.AnimateToPosition(endPos, null, true);
         }
     }
 
@@ -64,9 +71,28 @@ public class DrawCardController : MonoBehaviour
         
         Debug.Log("Deck Visuals should show " + amt + " cards.");
         
+        int offset = 3;
         for (int i = 0; i < 3; i++) {
-            Debug.Log("Deck card " + i + " amt > (2-i) = " + (amt > (2 - i)));
-            drawPileVisuals[i].SetActive(amt > i ? true : false);
+            offset--;
+            
+            Debug.Log("Card: "+i+ " = Active: "+ (amt > i));
+            
+            drawPileVisuals[i].SetActive(amt > offset ? true : false);
+
+            if (!drawPileVisuals[i].activeSelf) continue;
+
+            // Only Animate for visuable cards
+            // Set them at ther prev position and animate them into place       
+
+            Card card = drawPileVisuals[i].GetComponent<Card>();
+
+            card.transform.localPosition = drawPilePositions[i] + new Vector2(-8,8);
+
+            Debug.Log("Animating Card "+ i + " from "+card.transform.localPosition + " to pos " + drawPilePositions[i]);
+
+            card.AnimateToPosition(drawPilePositions[i], null, true);
+
+
         }
     }
     
@@ -89,8 +115,7 @@ public class DrawCardController : MonoBehaviour
 
             Card card = GetTossCardVisual(offsets, tossPile[i]);
         }
-
-        // If there is no toss cards, thene there is no option to shuffle them ? 
+        // If there is no toss cards, thene there is no option to shuffle them ?
     }
 
     private Card GetTossCardVisual(int offsets, int type)
@@ -107,12 +132,27 @@ public class DrawCardController : MonoBehaviour
 
     public void DrawCard()
     {
-        Debug.Log("Draw card.");
-        bool didShuffle = InventoryController.Instance.DrawDeckCard();
 
+        int cardIdOfDrawnCard = Stats.TopCardID;
+
+        (bool didShuffle, bool didDrawCard) = InventoryController.Instance.DrawDeckCard();
+
+        if(!didDrawCard)
+            return;
+
+        // Animate A card to Inventory
+        Debug.Log("Animate Drawing a card.");
+        GameController.Instance.AnimateDrawingACard(cardIdOfDrawnCard);
+
+        // Also Animate the DrawPile Cards
+        UpdateDecks(didShuffle);
+    }
+
+    private void UpdateDecks(bool didShuffle)
+    {
         UpdateDeckStackVisuals();
 
-        if(didShuffle)
+        if (didShuffle)
             UpdateTossStackVisuals();
     }
     
@@ -145,7 +185,7 @@ public class DrawCardController : MonoBehaviour
         }
     }
 
-    internal Vector2 GetTossPilePosition(bool animate) => TossHolder.transform.position;
+    internal Vector2 GetTossPilePosition() => TossHolder.transform.position;
     internal bool IsOverTossArea()
     {
         Debug.Log("Checking if over Toss Area");

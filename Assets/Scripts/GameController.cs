@@ -21,7 +21,8 @@ public class GameController : MonoBehaviour
     [SerializeField] private Transform ghostHolder; 
 	
 	
-	private Card mimicCard = null; 
+	private Card mimicCard = null;
+    private bool placeHidden = false;
 
 	public static GameController Instance { get; private set; }
 
@@ -156,7 +157,9 @@ public class GameController : MonoBehaviour
     }
     public void PlaceGeneratedCardInInventory(Card card)
     {
+        Debug.Log("PLace A Generated Card into Inventory");
         mimicCard = card;
+        placeHidden = true;
         ExecuteDropAction(new DropCardAction() { action = CardAction.PlaceInventory });
         mimicCard = null;
     }
@@ -175,7 +178,7 @@ public class GameController : MonoBehaviour
                 SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
                 break;
             case CardAction.PlaceInventory:
-                InventoryController.Instance.PlaceCard(mimicCard);
+                InventoryController.Instance.PlaceCard(mimicCard, hidden: placeHidden);
                 SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 break;
             case CardAction.TossCard:
@@ -365,5 +368,34 @@ public class GameController : MonoBehaviour
 
         // Store Card ID in tossPile
         Stats.AddTossCard(card, animate); 
+    }
+
+
+    public void AnimateDrawingACard(int ID) => AnimateDrawingACard(ItemCreator.Instance.GenerateCard(ID));
+    public void AnimateDrawingACard(Card cardToDrag)
+    {        
+        // Try instantiating and cloning the dragged card
+        if (ghostCard != null)
+            Destroy(ghostCard.gameObject);
+        
+        Debug.Log("Animation Start - Show Ghost");
+
+        // Set Ghostcard to mimic this Card
+        ghostCard = Instantiate(cardToDrag, ghostHolder);
+        ghostCard.Mimic(cardToDrag);
+
+        // Animate
+        Vector2 startPosition = DrawCardController.Instance.GetTossPilePosition();
+        Vector2 endPosition = InventoryController.Instance.GetPosition();
+
+        ghostCard.transform.position = startPosition;
+
+        (ghostCard as Card).AnimateToPosition(endPosition, () => HandleDrawingAnimationComplete());
+    }
+
+    private void HandleDrawingAnimationComplete()
+    {
+        Debug.Log("Animation Complete - Hide The Ghost");
+        HideGhost();
     }
 }

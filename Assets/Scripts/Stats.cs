@@ -28,6 +28,7 @@ public static class Stats
     internal static bool AnimateCards = false;
 
     public static bool IsPaused { get; internal set; }
+    public static int TopCardID => Deck.Count == 0 ? -1 : Deck.Peek();
     public static int CurrentDeckCards => CurrentDeck.Sum();
 
     public static Action DrawDeckUpdated;
@@ -163,7 +164,6 @@ public static class Stats
         }
         return cards;
     }
-
     internal static int DrawTopCard()
     {
         if (Deck.Count == 0) return -1;
@@ -187,9 +187,9 @@ public static class Stats
     internal static void AddTossCard(Card card, bool animate = true)
     {
         if(animate)
-            card.AnimateToPosition(DrawCardController.Instance.GetTossPilePosition(animate), () => TossCardCompleted(card));
+            card.AnimateToPosition(DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
         else {
-            DrawCardController.Instance.GetTossPilePosition(animate);
+            DrawCardController.Instance.GetTossPilePosition();
             TossCardCompleted(card);
         }
     }

@@ -17,6 +17,7 @@ public class InventoryController : MonoBehaviour
     //private Card[,] gridcards;
     
     [SerializeField] private Transform itemHolder;
+    [SerializeField] private GameObject tempCard;
 
     public int HeldItems => itemHolder.transform.childCount;
 
@@ -31,7 +32,7 @@ public class InventoryController : MonoBehaviour
         Instance = this;
     }
         
-    internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true, bool useMousePositionToOrder = true)
+    internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true, bool useMousePositionToOrder = true, bool hidden = true)
     {
         // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
         mimicedCard.transform.parent = itemHolder;
@@ -48,6 +49,9 @@ public class InventoryController : MonoBehaviour
         mimicedCard.UnsetPosition();
 
         mimicedCard.SetScale();
+
+        if(hidden)
+            mimicedCard.gameObject.SetActive(false);
     }
 
     private int GetInventoryOrderByMousePosition()
@@ -68,18 +72,22 @@ public class InventoryController : MonoBehaviour
         return itemHolder.childCount;
     }
 
-    public bool DrawDeckCard()
+    public (bool, bool) DrawDeckCard()
     {
         if (!CanAddCard()) {
             InfoPanel.Instance.ShowInfo("Inventory Full.");
             SoundMaster.Instance.PlaySound(SoundName.PlaceError);
-            return false;
+            return (false,false);
         }
 
         int cardIdOfDrawnCard = Stats.DrawTopCard();
 
-        // Only Draw Card if there is One
-        if(cardIdOfDrawnCard >= 0) {
+        // If we need to animate this - handle wait for adding it in inventory  
+
+        Debug.Log("Card ID: "+cardIdOfDrawnCard);
+
+        // Only Create a Card if there is One in the deck
+        if (cardIdOfDrawnCard >= 0) {
             Card card = ItemCreator.Instance.GenerateCard(cardIdOfDrawnCard, true);
             GameController.Instance.PlaceGeneratedCardInInventory(card);
         }
@@ -87,13 +95,12 @@ public class InventoryController : MonoBehaviour
         // Shuffle
         bool didShuffle = Stats.ShuffleIfNeeded();
         
-        return didShuffle;
+        return (didShuffle, true);
     }
 
     public void GenerateRedCard() => GenerateRandomCard(GemType.Red);
     public void GenerateGreenCard() => GenerateRandomCard(GemType.Green);
     public void GenerateBlueCard() => GenerateRandomCard(GemType.Blue);
-
 
     public void GenerateRedGainCard() => GenerateRandomCard(GemType.Red, 1);
     public void GenerateGreenGainCard() => GenerateRandomCard(GemType.Green, 1);
@@ -138,5 +145,16 @@ public class InventoryController : MonoBehaviour
     internal bool CanAddCard()
     {
         return (HeldItems < MaxCardsInInventory);
+    }
+
+    internal Vector2 GetPosition() => itemHolder.transform.position;
+
+    internal void ActivateTempCard()
+    {
+        tempCard.gameObject.SetActive(true);
+    }
+    internal void ReplaceTempCard()
+    {
+        tempCard.gameObject.SetActive(false);
     }
 }

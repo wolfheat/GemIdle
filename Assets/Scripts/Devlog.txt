@@ -38,9 +38,13 @@ Jun 2026
 		* DrawDeckSystem Implemented
 14/7	* Made Drawpiles ordering and Display correctly
 15/7	* Removed animation when dragging a card to Tosspile
+16/7	* Added Togglble World Time
 
+		* Figure out how to handle moving cards from draw deck to inventory
+		
+		* Make drawing card animate card and the deck correctly
 
-		* If there is no toss cards, thene there is no option to shuffle them ?
+		* If there is no toss cards, then there is no option to shuffle them ?
 		* Should we have unique cards that only can appear once, and normal cards that can have duplicates?
 
 

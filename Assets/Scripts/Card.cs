@@ -3,6 +3,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SocialPlatforms;
 using Wolfheat.StartMenu;
 
 public class GameAreaPosition
@@ -326,18 +327,22 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         Debug.Log("Scaling card to "+GameStats.BoxWidth+","+GameStats.BoxHeight);
     }
 
-    internal void AnimateToPosition(Vector2 endPos, Action callback) => StartCoroutine(AnimateToPositionCO(endPos, callback));
+    internal void AnimateToPosition(Vector2 endPos, Action callback, bool local = false) => StartCoroutine(AnimateToPositionCO(endPos, callback, local));
 
-    private IEnumerator AnimateToPositionCO(Vector2 endPos, Action callback)
+    private IEnumerator AnimateToPositionCO(Vector2 endPos, Action callback, bool local = false)
     {
-        Vector2 startPos = transform.position;
+        Vector2 startPos = local ? transform.localPosition : transform.position;
         
         float moveTimer = 0f;
 
         while (moveTimer < MoveTime) {
             moveTimer += Time.deltaTime;
             float fraction = moveTimer / MoveTime;
-            transform.position = Vector2.Lerp(startPos, endPos, fraction);
+            if(local)
+                transform.localPosition = Vector2.Lerp(startPos, endPos, fraction);
+            else
+                transform.position = Vector2.Lerp(startPos, endPos, fraction);
+
             yield return null;
         }
 
@@ -345,4 +350,9 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     }
 
     internal void Destroy() => Destroy(gameObject);
+
+    internal IEnumerator AnimateToPositionCO(object endPos, object callback)
+    {
+        throw new NotImplementedException();
+    }
 }
