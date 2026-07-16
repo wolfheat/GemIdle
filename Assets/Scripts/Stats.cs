@@ -11,6 +11,7 @@ public static class GameStats
     public const int Height = 5;
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
+    public const float AnimationTime = 0.15f;
 }
 
 public static class Stats
@@ -31,7 +32,10 @@ public static class Stats
     public static int TopCardID => Deck.Count == 0 ? -1 : Deck.Peek();
     public static int CurrentDeckCards => CurrentDeck.Sum();
 
+    public static bool MusicIsOn = false;
+
     public static Action DrawDeckUpdated;
+    public static Action TossDeckUpdated;
 
     public static void Initiate()
     {
@@ -175,21 +179,23 @@ public static class Stats
 
     internal static bool ShuffleIfNeeded()
     {
-        if(Deck.Count == 0) {
+        if(Deck.Count == 0 && Toss.Count > 0) {
             ScrambleTossPile();
             return true;
         }
-
         return false;
     }
 
     // Animate to toss pile
     internal static void AddTossCard(Card card, bool animate = true)
     {
-        if(animate)
-            card.AnimateToPosition(DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
+        if (animate) {
+            // Don't animate the actual card, use the ghost for this
+
+            // Animate Ghost from cards position to TossPile Position
+            GameController.Instance.AnimateGhostFromTo(card, card.transform.position, DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
+        }
         else {
-            DrawCardController.Instance.GetTossPilePosition();
             TossCardCompleted(card);
         }
     }
@@ -200,7 +206,7 @@ public static class Stats
         Toss.Push(card.ID);
 
         // Make the DrawDeck know it needs to update
-        DrawDeckUpdated?.Invoke();
+        TossDeckUpdated?.Invoke();
 
         // Destroy the actual card
         card.Destroy();

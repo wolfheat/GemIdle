@@ -163,10 +163,8 @@ namespace Wolfheat.StartMenu
             // Play theme sound
             activeMusic = MusicName.MenuMusic;
             
-            
-            PlayMusic(MusicName.MenuMusic);
-
-            
+            if(Stats.MusicIsOn)
+                PlayMusic(MusicName.MenuMusic);
         }
 
         //private bool haveNotSaidExplode = true;

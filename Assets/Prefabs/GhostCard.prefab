@@ -350,7 +350,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseCard
   image: {fileID: 415861544050067417}
+  backgroundImage: {fileID: 2060439650352417220}
+  border: {fileID: 8414297874396658636}
   descriptionText: {fileID: 669319841950624287}
+  actualCardPart: {fileID: 0}
 --- !u!114 &1189335124918380028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -530,7 +533,7 @@ GameObject:
   - component: {fileID: 4252982684522181025}
   - component: {fileID: 2060439650352417220}
   m_Layer: 5
-  m_Name: CardPart
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -758,7 +761,7 @@ GameObject:
   - component: {fileID: 5236799382634775639}
   - component: {fileID: 8414297874396658636}
   m_Layer: 5
-  m_Name: BackgroundPart
+  m_Name: Border
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

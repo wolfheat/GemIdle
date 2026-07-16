@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
@@ -8,7 +9,8 @@ public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge, Ad
 public struct DropCardAction
 {
     public CardAction action;
-    public Vector2Int dropPosition;
+    public Vector2 originPosition;
+    public Vector2Int dropPositionIndex;
     public Card targetCard;
 }
 
@@ -155,12 +157,12 @@ public class GameController : MonoBehaviour
         mimicCard = null;
 
     }
-    public void PlaceGeneratedCardInInventory(Card card)
+    public void PlaceGeneratedCardInInventory(Card card, Vector2 pos)
     {
         Debug.Log("PLace A Generated Card into Inventory");
         mimicCard = card;
         placeHidden = true;
-        ExecuteDropAction(new DropCardAction() { action = CardAction.PlaceInventory });
+        ExecuteDropAction(new DropCardAction() { action = CardAction.PlaceInventory, originPosition = pos });
         mimicCard = null;
     }
 
@@ -174,11 +176,11 @@ public class GameController : MonoBehaviour
                 SoundMaster.Instance.PlaySound(SoundName.PlaceError);
                 break;
             case CardAction.PlaceGameArea:
-                GameAreaController.Instance.PlaceCard(mimicCard, dropCardAction.dropPosition.x, dropCardAction.dropPosition.y);
+                GameAreaController.Instance.PlaceCard(mimicCard, dropCardAction.dropPositionIndex.x, dropCardAction.dropPositionIndex.y);
                 SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
                 break;
             case CardAction.PlaceInventory:
-                InventoryController.Instance.PlaceCard(mimicCard, hidden: placeHidden);
+                InventoryController.Instance.PlaceCard(mimicCard, dropCardAction.originPosition, animate: placeHidden);
                 SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 break;
             case CardAction.TossCard:
@@ -233,8 +235,9 @@ public class GameController : MonoBehaviour
         }
         else if (OutsidePlayArea(localIndex)) { // Position Index Dropped
             if (BelowPlayArea(localIndex)) {
-                if(InventoryController.Instance.CanAddCard())
+                if (InventoryController.Instance.CanAddCard()) {
                     cardAction = CardAction.PlaceInventory;
+                }
                 else
                     cardAction = CardAction.Invalid;
             }
@@ -266,7 +269,8 @@ public class GameController : MonoBehaviour
             cardAction = CardAction.Swap;
         }
 
-        return new DropCardAction() {dropPosition = localIndex, targetCard = placedCard, action = cardAction };
+        return new DropCardAction() {dropPositionIndex = localIndex, targetCard = placedCard, action = cardAction, originPosition = Mouse.current.position.ReadValue(),
+        };
     }
 
     private bool OverTossDeck(Vector2Int localIndex) => DrawCardController.Instance.IsOverTossArea();
@@ -364,38 +368,55 @@ public class GameController : MonoBehaviour
     public static void TossCard(Card card, bool animate = true)
     {
         // Move to Toss
-        card.UnsetPosition();
+        card.UnsetPositionIndex();
 
         // Store Card ID in tossPile
         Stats.AddTossCard(card, animate); 
     }
-
-
-    public void AnimateDrawingACard(int ID) => AnimateDrawingACard(ItemCreator.Instance.GenerateCard(ID));
-    public void AnimateDrawingACard(Card cardToDrag)
-    {        
-        // Try instantiating and cloning the dragged card
-        if (ghostCard != null)
-            Destroy(ghostCard.gameObject);
-        
-        Debug.Log("Animation Start - Show Ghost");
-
-        // Set Ghostcard to mimic this Card
-        ghostCard = Instantiate(cardToDrag, ghostHolder);
-        ghostCard.Mimic(cardToDrag);
-
-        // Animate
-        Vector2 startPosition = DrawCardController.Instance.GetTossPilePosition();
-        Vector2 endPosition = InventoryController.Instance.GetPosition();
-
-        ghostCard.transform.position = startPosition;
-
-        (ghostCard as Card).AnimateToPosition(endPosition, () => HandleDrawingAnimationComplete());
-    }
-
-    private void HandleDrawingAnimationComplete()
+    
+    internal void AnimateGhostFromTo(Card cardToPlace, Vector3 fromPos, Vector2 toPos, Action callback, bool hideDuringTransition = true)
     {
-        Debug.Log("Animation Complete - Hide The Ghost");
-        HideGhost();
+        // Do animation
+        Debug.Log("Animating Ghost card from position "+fromPos+" to " + toPos);
+
+        StartCoroutine(Animate());
+
+        // Local Coroutine Method
+        IEnumerator Animate()
+        {
+         
+            ghostCard.gameObject.SetActive(true);
+
+            Debug.Log("Animating Ghost mimicing: " + cardToPlace.ID);
+
+            if (ghostCard != null)
+                Destroy(ghostCard.gameObject);
+
+            ghostCard = Instantiate(cardToPlace, ghostHolder);
+            ghostCard.Mimic(cardToPlace);
+
+
+            if (hideDuringTransition) {
+                Debug.Log("Hiding Actual Parts Of Card during animation");
+                cardToPlace.HideVisuals();
+            }
+
+            float t = 0;
+
+            
+            while (t < GameStats.AnimationTime) {
+                t += Time.deltaTime;
+                ghostCard.transform.position = Vector3.Lerp(fromPos, toPos, t/GameStats.AnimationTime);
+                yield return null;
+            }
+
+            ghostCard.gameObject.SetActive(false);
+
+            if (hideDuringTransition)
+                cardToPlace.ShowVisuals();
+
+            // Return to Callback
+            callback?.Invoke();
+        }
     }
 }

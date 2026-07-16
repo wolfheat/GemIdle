@@ -3,7 +3,6 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SocialPlatforms;
 using Wolfheat.StartMenu;
 
 public class GameAreaPosition
@@ -15,6 +14,7 @@ public class GameAreaPosition
 
 public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 {
+
     [SerializeField] private bool inPlay = true;
     [SerializeField] private CardData cardData;    
     [SerializeField] private DotTimer dotTimer;
@@ -41,9 +41,9 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     public int Multiplier => currentMultiplier;
     public int ID => cardData.ID;
 
-    public void UnsetPosition()
+    public void UnsetPositionIndex()
     {
-        GameAreaController.Instance.RemoveOldPlacement(this);
+        GameAreaController.Instance.RemoveOldPlacementIndex(this);
 
         Place(-1, -1);
 
@@ -84,7 +84,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             }
             else {
                 if (InventoryController.Instance.CanAddCard()) {
-                    InventoryController.Instance.PlaceCard(this,true,false);
+                    InventoryController.Instance.PlaceCard(this,this.transform.position,true,false);
                     SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 }
                 else {
@@ -351,8 +351,4 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     internal void Destroy() => Destroy(gameObject);
 
-    internal IEnumerator AnimateToPositionCO(object endPos, object callback)
-    {
-        throw new NotImplementedException();
-    }
 }

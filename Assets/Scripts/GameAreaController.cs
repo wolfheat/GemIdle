@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using Wolfheat.StartMenu;
 
@@ -67,7 +68,8 @@ public class GameAreaController : MonoBehaviour
 
         if(fromPos.x == -1) {
             // Card is coming from the hand
-            InventoryController.Instance.PlaceCard(targetCard, false);
+            Debug.Log("SWAPFAIL - Returning card to Inventory from position: "+ targetCard.transform.position);
+            InventoryController.Instance.PlaceCard(targetCard,targetCard.transform.position, false);
             PlaceCard(mimicedCard, toPos.x, toPos.y, false);
         }
         else {
@@ -94,7 +96,7 @@ public class GameAreaController : MonoBehaviour
         RectTransform rect = mimicedCard.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
         
-        RemoveOldPlacement(mimicedCard, unsetOldPosition);
+        RemoveOldPlacementIndex(mimicedCard, unsetOldPosition);
 
         mimicedCard.Place(xPos,yPos);
 
@@ -104,7 +106,7 @@ public class GameAreaController : MonoBehaviour
 
     }
 
-    public void RemoveOldPlacement(Card mimicedCard, bool unsetOldPosition = true)
+    public void RemoveOldPlacementIndex(Card mimicedCard, bool unsetOldPosition = true)
     {
         // If it was placed, remove old placement
         Vector2Int oldPos = mimicedCard.PlacedGameAreaPosition.Pos;
@@ -155,18 +157,36 @@ public class GameAreaController : MonoBehaviour
     internal Card Occupier(int x, int y) => IndexOutsidePlacedCardsArray(x, y) ? null : placedCards[x, y];
     private bool IndexOutsidePlacedCardsArray(int x, int y) => (x < 0 || x >= placedCards.GetLength(0) || y < 0 || y >= placedCards.GetLength(1));
     
-    internal bool PlaceCardOnFirstEmptySpot(Card card)
+    internal bool PlaceCardOnFirstEmptySpot(Card cardToPlace)
     {
+        Vector2 startPos = cardToPlace.transform.position;
+
         for (int j = 0; j < GameStats.Height; j++) {
             for (int i = 0; i < GameStats.Width; i++) {
                 if (placedCards[i, j] != null) continue;
 
                 // Found an empty space
-                PlaceCard(card, i, j);
+                PlaceCard(cardToPlace, i, j);
+                // Wait one frame
+                StartCoroutine(AnimateOneFrameLater());
+
                 return true;
             }
         }
         return false;
+
+        IEnumerator AnimateOneFrameLater()
+        {
+            yield return null;
+
+            if (true) { // Always Animate
+                // If it should animate
+                // Place it, but have it hidden until ghost animation is complete
+
+                // Animate - Might need to wait a frame for the end pos to update
+                GameController.Instance.AnimateGhostFromTo(cardToPlace, startPos, cardToPlace.transform.position, null, true);
+            }
+        }
     }
 
     internal Card GetCardAt(Vector2Int pos)

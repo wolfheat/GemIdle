@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Wolfheat.StartMenu;
 
 public class DrawCardController : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class DrawCardController : MonoBehaviour
     private Vector2[] drawPilePositions = new Vector2[3];
 
     private Vector2 drawPileOffset = new Vector2(-8, 8);
+
+    public Vector2 GetDeckPosition() => DeckHolder.transform.position;
 
     public static DrawCardController Instance { get; private set; }
 
@@ -28,18 +31,21 @@ public class DrawCardController : MonoBehaviour
 
     private void OnEnable()
     {
-        Stats.DrawDeckUpdated += FillDeckAndToss;
+        Stats.DrawDeckUpdated += UpdateDeckStackVisuals;
+        Stats.TossDeckUpdated += UpdateTossStackVisuals;
     }
     
     private void OnDisable()
     {
-        Stats.DrawDeckUpdated -= FillDeckAndToss;
+        Stats.DrawDeckUpdated -= UpdateDeckStackVisuals;
+        Stats.TossDeckUpdated -= UpdateTossStackVisuals;
     }
 
     private void Start()
     {
         // Initiate the Deck Pile, then just enable or disable the visuals of it
         GenerateDeckVisuals();
+        FillDeckAndToss();
     }
 
     private void GenerateDeckVisuals()
@@ -69,13 +75,13 @@ public class DrawCardController : MonoBehaviour
         // Just show the correct parts of the visuals
         int amt = Math.Min(3, Stats.Deck.Count);
         
-        Debug.Log("Deck Visuals should show " + amt + " cards.");
+        Debug.Log("DECK: Deck Visuals should show " + amt + " cards.");
         
         int offset = 3;
         for (int i = 0; i < 3; i++) {
             offset--;
             
-            Debug.Log("Card: "+i+ " = Active: "+ (amt > i));
+            Debug.Log("DECK: Card: " + i+ " = Active: "+ (amt > i));
             
             drawPileVisuals[i].SetActive(amt > offset ? true : false);
 
@@ -86,32 +92,30 @@ public class DrawCardController : MonoBehaviour
 
             Card card = drawPileVisuals[i].GetComponent<Card>();
 
-            card.transform.localPosition = drawPilePositions[i] + new Vector2(-8,8);
+            if (i > 0) { // Thord card never moves into position
 
-            Debug.Log("Animating Card "+ i + " from "+card.transform.localPosition + " to pos " + drawPilePositions[i]);
-
-            card.AnimateToPosition(drawPilePositions[i], null, true);
-
-
+                card.transform.localPosition = drawPilePositions[i] + new Vector2(-8,8);
+                card.AnimateToPosition(drawPilePositions[i], null, true);
+            }
         }
     }
     
     private void UpdateTossStackVisuals()
-    {
+    {   
         RemoveOldCards();
         List<int> tossPile = new List<int>(Stats.Toss);
         tossPile.Reverse();
-        Debug.Log("Updating TossPile cards: " + tossPile.Count);
+        Debug.Log("TOSS: Updating TossPile cards: " + tossPile.Count);
         int amt = tossPile.Count;
         int startIndex = amt - 3;
         int offsets = 3;
         for (int i = startIndex; i < amt; i++) {
-            Debug.Log("Index: " + i+"  offsets:" + offsets);
+            Debug.Log("TOSS: Index: " + i+"  offsets:" + offsets);
             offsets--;
             
             if (i < 0) continue;
 
-            Debug.Log("Index: " + i+"  Create Card!");
+            Debug.Log("TOSS: Index: " + i+"  Create Card!");
 
             Card card = GetTossCardVisual(offsets, tossPile[i]);
         }
@@ -135,15 +139,30 @@ public class DrawCardController : MonoBehaviour
 
         int cardIdOfDrawnCard = Stats.TopCardID;
 
-        (bool didShuffle, bool didDrawCard) = InventoryController.Instance.DrawDeckCard();
+        bool canDraw = InventoryController.Instance.CanAddCard();
 
-        if(!didDrawCard)
+        if (!canDraw || cardIdOfDrawnCard < 0) {
+
+            // Shuffle
+            if (Stats.ShuffleIfNeeded()) {
+                UpdateDecks(true);
+                return;
+            }
+
+            InfoPanel.Instance.ShowInfo("Inventory Full or No Cards In Toss Pile.");
+            SoundMaster.Instance.PlaySound(SoundName.PlaceError);   
             return;
+        }
 
-        // Animate A card to Inventory
-        Debug.Log("Animate Drawing a card.");
-        GameController.Instance.AnimateDrawingACard(cardIdOfDrawnCard);
+        Stats.DrawTopCard();
 
+        // Only Create a Card if there is One in the deck
+        Card card = ItemCreator.Instance.GenerateCard(cardIdOfDrawnCard, true);
+        GameController.Instance.PlaceGeneratedCardInInventory(card, DeckHolder.position);
+
+        // Shuffle
+        bool didShuffle = Stats.ShuffleIfNeeded();    
+    
         // Also Animate the DrawPile Cards
         UpdateDecks(didShuffle);
     }
@@ -167,9 +186,6 @@ public class DrawCardController : MonoBehaviour
 
     public void FillDeckAndToss()
     {
-        // Remove any old card
-        RemoveOldCards();
-
         // Use players Card to fill the shown decks
         UpdateDeckStackVisuals();
         UpdateTossStackVisuals();

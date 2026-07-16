@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,26 +33,41 @@ public class InventoryController : MonoBehaviour
         Instance = this;
     }
         
-    internal void PlaceCard(Card mimicedCard, bool unsetOldPosition = true, bool useMousePositionToOrder = true, bool hidden = true)
+    internal void PlaceCard(Card cardToPlace, Vector2 startPos, bool unsetOldPosition = true, bool useMousePositionToOrder = true, bool animate = true)
     {
         // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
-        mimicedCard.transform.parent = itemHolder;
-        
+        cardToPlace.transform.parent = itemHolder;
+
         if (useMousePositionToOrder) {
             int order = GetInventoryOrderByMousePosition();
-            mimicedCard.transform.SetSiblingIndex(order);
+            cardToPlace.transform.SetSiblingIndex(order);
         }
 
+        cardToPlace.transform.localPosition = Vector2.zero;
+
         // Removes from GameArea if present there
-        GameAreaController.Instance.RemoveOldPlacement(mimicedCard);
+        GameAreaController.Instance.RemoveOldPlacementIndex(cardToPlace);
 
         // Make the card forget its placement as well - Need to happen after
-        mimicedCard.UnsetPosition();
+        cardToPlace.UnsetPositionIndex();
 
-        mimicedCard.SetScale();
+        cardToPlace.SetScale();
 
-        if(hidden)
-            mimicedCard.gameObject.SetActive(false);
+        // Wait one frame
+        StartCoroutine(AnimateOneFrameLater());
+
+        IEnumerator AnimateOneFrameLater()
+        {
+            yield return null;
+
+            if (animate) {
+                // If it should animate
+                // Place it, but have it hidden until ghost animation is complete
+
+                // Animate - Might need to wait a frame for the end pos to update
+                GameController.Instance.AnimateGhostFromTo(cardToPlace, startPos,cardToPlace.transform.position, null, true);
+            }
+        }
     }
 
     private int GetInventoryOrderByMousePosition()
@@ -72,31 +88,6 @@ public class InventoryController : MonoBehaviour
         return itemHolder.childCount;
     }
 
-    public (bool, bool) DrawDeckCard()
-    {
-        if (!CanAddCard()) {
-            InfoPanel.Instance.ShowInfo("Inventory Full.");
-            SoundMaster.Instance.PlaySound(SoundName.PlaceError);
-            return (false,false);
-        }
-
-        int cardIdOfDrawnCard = Stats.DrawTopCard();
-
-        // If we need to animate this - handle wait for adding it in inventory  
-
-        Debug.Log("Card ID: "+cardIdOfDrawnCard);
-
-        // Only Create a Card if there is One in the deck
-        if (cardIdOfDrawnCard >= 0) {
-            Card card = ItemCreator.Instance.GenerateCard(cardIdOfDrawnCard, true);
-            GameController.Instance.PlaceGeneratedCardInInventory(card);
-        }
-
-        // Shuffle
-        bool didShuffle = Stats.ShuffleIfNeeded();
-        
-        return (didShuffle, true);
-    }
 
     public void GenerateRedCard() => GenerateRandomCard(GemType.Red);
     public void GenerateGreenCard() => GenerateRandomCard(GemType.Green);
@@ -137,15 +128,10 @@ public class InventoryController : MonoBehaviour
         }
         Debug.Log("Generated a Card of type: "+type.ToString()+" and subtype: "+subType+" name: " + card.name); 
 
-        
-
-        GameController.Instance.PlaceGeneratedCardInInventory(card);
+        GameController.Instance.PlaceGeneratedCardInInventory(card, DrawCardController.Instance.GetDeckPosition());
     }
 
-    internal bool CanAddCard()
-    {
-        return (HeldItems < MaxCardsInInventory);
-    }
+    internal bool CanAddCard() => (HeldItems < MaxCardsInInventory);
 
     internal Vector2 GetPosition() => itemHolder.transform.position;
 
