@@ -187,13 +187,13 @@ public static class Stats
     }
 
     // Animate to toss pile
-    internal static void AddTossCard(Card card, bool animate = true)
+    internal static void AddTossCard(Card card, bool animate = true, Vector3 position = default)
     {
         if (animate) {
             // Don't animate the actual card, use the ghost for this
 
             // Animate Ghost from cards position to TossPile Position
-            GameController.Instance.AnimateGhostFromTo(card, card.transform.position, DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
+            GameController.Instance.AnimateGhostFromTo(card, card, position != default ? position : card.transform.position, DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
         }
         else {
             TossCardCompleted(card);

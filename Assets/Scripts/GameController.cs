@@ -314,7 +314,7 @@ public class GameController : MonoBehaviour
             placedCard.MultiplyBy(multiplier);
 
             // Remove The Card
-            TossCard(mimicCard);
+            TossCard(mimicCard, true , placedCard.transform.position);
         }
     }
 
@@ -338,7 +338,7 @@ public class GameController : MonoBehaviour
             placedCard.AddToIncome(add); // Doesnt really multiply
 
             // Remove The Card - Throw in TossPile
-            TossCard(mimicCard);
+            TossCard(mimicCard, true, placedCard.transform.position);
         }
     }
     
@@ -361,20 +361,20 @@ public class GameController : MonoBehaviour
             placedCard.MultiplyBy(add); // Doesnt really multiply
 
             // Remove The Card
-            TossCard(mimicCard);
+            TossCard(mimicCard, true, placedCard.transform.position);
         }
     }
 
-    public static void TossCard(Card card, bool animate = true)
+    public static void TossCard(Card card, bool animate = true, Vector3 position = default)
     {
         // Move to Toss
         card.UnsetPositionIndex();
 
         // Store Card ID in tossPile
-        Stats.AddTossCard(card, animate); 
+        Stats.AddTossCard(card, animate, position); 
     }
     
-    internal void AnimateGhostFromTo(Card cardToPlace, Vector3 fromPos, Vector2 toPos, Action callback, bool hideDuringTransition = true)
+    internal void AnimateGhostFromTo(Card cardToPlace, Card cardToMimic, Vector3 fromPos, Vector2 toPos, Action callback, bool hideDuringTransition = true)
     {
         // Do animation
         Debug.Log("Animating Ghost card from position "+fromPos+" to " + toPos);
@@ -392,7 +392,7 @@ public class GameController : MonoBehaviour
             if (ghostCard != null)
                 Destroy(ghostCard.gameObject);
 
-            ghostCard = Instantiate(cardToPlace, ghostHolder);
+            ghostCard = Instantiate(cardToMimic, ghostHolder);
             ghostCard.Mimic(cardToPlace);
 
 
@@ -402,8 +402,7 @@ public class GameController : MonoBehaviour
             }
 
             float t = 0;
-
-            
+                        
             while (t < GameStats.AnimationTime) {
                 t += Time.deltaTime;
                 ghostCard.transform.position = Vector3.Lerp(fromPos, toPos, t/GameStats.AnimationTime);

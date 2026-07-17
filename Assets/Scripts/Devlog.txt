@@ -40,8 +40,10 @@ Jun 2026
 15/7	* Removed animation when dragging a card to Tosspile
 16/7	* Added Togglble World Time
 		* Animated most actions of cards insted of instant.
+		* Tried different card background motive
+		* Fixed merging animating from wrong position
 
-		* Still need to fix when a card is removed but tries to reenable after animation
+					
 
 
 		* Figure out how to handle moving cards from draw deck to inventory

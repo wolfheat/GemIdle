@@ -167,26 +167,13 @@ public class GameAreaController : MonoBehaviour
 
                 // Found an empty space
                 PlaceCard(cardToPlace, i, j);
-                // Wait one frame
-                StartCoroutine(AnimateOneFrameLater());
+                
+                GameController.Instance.AnimateGhostFromTo(cardToPlace, cardToPlace, startPos, cardToPlace.transform.position, null, true);
 
                 return true;
             }
         }
         return false;
-
-        IEnumerator AnimateOneFrameLater()
-        {
-            yield return null;
-
-            if (true) { // Always Animate
-                // If it should animate
-                // Place it, but have it hidden until ghost animation is complete
-
-                // Animate - Might need to wait a frame for the end pos to update
-                GameController.Instance.AnimateGhostFromTo(cardToPlace, startPos, cardToPlace.transform.position, null, true);
-            }
-        }
     }
 
     internal Card GetCardAt(Vector2Int pos)

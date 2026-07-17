@@ -81,6 +81,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
                     InfoPanel.Instance.ShowInfo("Play Area is Full, Can not place item.");
                     SoundMaster.Instance.PlaySound(SoundName.PlaceError);
                 }
+                SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
             }
             else {
                 if (InventoryController.Instance.CanAddCard()) {
@@ -313,7 +314,6 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     internal void SetScale()
     {
         // Need to do this delayed
-
         StartCoroutine(DelayedScale());
     }
 

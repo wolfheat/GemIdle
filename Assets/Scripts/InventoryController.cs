@@ -53,6 +53,10 @@ public class InventoryController : MonoBehaviour
 
         cardToPlace.SetScale();
 
+        Card copy = Instantiate(cardToPlace);
+        
+        cardToPlace.HideVisuals();
+
         // Wait one frame
         StartCoroutine(AnimateOneFrameLater());
 
@@ -65,7 +69,7 @@ public class InventoryController : MonoBehaviour
                 // Place it, but have it hidden until ghost animation is complete
 
                 // Animate - Might need to wait a frame for the end pos to update
-                GameController.Instance.AnimateGhostFromTo(cardToPlace, startPos,cardToPlace.transform.position, null, true);
+                GameController.Instance.AnimateGhostFromTo(cardToPlace, copy, startPos,cardToPlace.transform.position, null, true);
             }
         }
     }
