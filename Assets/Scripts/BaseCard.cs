@@ -16,8 +16,8 @@ public class BaseCard : MonoBehaviour
         // Make this card a copy of the mimiced card
         descriptionText = cardToDrag.descriptionText;
         image = cardToDrag.image;
-    }
 
+    }
 
     internal void HideVisuals() => actualCardPart.SetActive(false);
     internal void ShowVisuals() => actualCardPart.SetActive(true);

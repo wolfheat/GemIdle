@@ -42,7 +42,7 @@ Jun 2026
 		* Animated most actions of cards insted of instant.
 		* Tried different card background motive
 		* Fixed merging animating from wrong position
-
+17/7	* Card Style Change
 					
 
 
