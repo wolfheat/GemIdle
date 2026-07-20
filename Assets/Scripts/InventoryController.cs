@@ -58,19 +58,13 @@ public class InventoryController : MonoBehaviour
         cardToPlace.HideVisuals();
 
         // Wait one frame
-        StartCoroutine(AnimateOneFrameLater());
+        if (animate)
+            StartCoroutine(DelayedAnimationRoutine());
 
-        IEnumerator AnimateOneFrameLater()
+        IEnumerator DelayedAnimationRoutine()
         {
             yield return null;
-
-            if (animate) {
-                // If it should animate
-                // Place it, but have it hidden until ghost animation is complete
-
-                // Animate - Might need to wait a frame for the end pos to update
-                GameController.Instance.AnimateGhostFromTo(cardToPlace, copy, startPos,cardToPlace.transform.position, null, true);
-            }
+            GameController.Instance.AnimateGhostFromTo(cardToPlace, copy, startPos,cardToPlace.transform.position, null);
         }
     }
 

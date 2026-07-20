@@ -32,6 +32,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     public GameAreaPosition PlacedGameAreaPosition { get; internal set; } = new GameAreaPosition() { Pos = new Vector2Int(-1, -1) };
     public bool IsMultiplier => cardData is MultiplyCardData;
+    public bool IsAdder => cardData is AddCardData;
     public bool AcceptsMerge => cardData.AcceptsMerge;
     public bool IsMover => cardData is MoverCardData;
     public bool IsIncomeCard => currentIncome > 0;
@@ -40,6 +41,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     public bool IsAddCard => cardData is AddCardData;
     public int Multiplier => currentMultiplier;
     public int ID => cardData.ID;
+
+    public bool IsUnplaced => PlacedGameAreaPosition.Pos.x == -1;
 
     public void UnsetPositionIndex()
     {
@@ -65,7 +68,9 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log("Clicking Card: "+cardData.name);
+        if (eventData.button == PointerEventData.InputButton.Middle) return;
+
+            Debug.Log("Clicking Card: "+cardData.name);
         if (!inPlay) {
             // Do deckbuilding stuff here instead
             Debug.Log("Card not in play: ");
@@ -106,6 +111,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (eventData.button == PointerEventData.InputButton.Middle) return;
+
         if (!inPlay) {
             // Do deckbuilding stuff here instead
             return;
@@ -170,6 +177,9 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
                 Debug.Log("GainTextField.text: "+gainTextField.text);
                 gainTextField.text = "";
                 break;
+            case DeadCardData:
+                image.sprite = cardData.Image;
+                break;
             default:
                 image.sprite = cardData.Image;
                 currentIncome = cardData.baseIncome;
@@ -179,7 +189,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         string colorForGemInsideText = GemColorString(cardData);
 
         // Fill in the data onto the card from the datafile
-        descriptionText.text = "+" + cardData.baseIncome + "   <sprite name=" + cardData.Image.name + ">";
+        if(descriptionText != null)
+            descriptionText.text = "+" + cardData.baseIncome + "   <sprite name=" + cardData.Image.name + ">";
                 
     }
 
@@ -324,7 +335,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         RectTransform rect = GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
         rect.localScale = Vector3.one;
-        Debug.Log("Scaling card to "+GameStats.BoxWidth+","+GameStats.BoxHeight);
+        //Debug.Log("Scaling card to "+GameStats.BoxWidth+","+GameStats.BoxHeight);
     }
 
     internal void AnimateToPosition(Vector2 endPos, Action callback, bool local = false) => StartCoroutine(AnimateToPositionCO(endPos, callback, local));

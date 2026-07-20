@@ -8,7 +8,9 @@ public class GameAreaController : MonoBehaviour
 
     private GridPosition[,] gridPositions;
     private Card[,] placedCards;
-    
+
+    public Vector2 GetGridPositionPositionVector(Vector2Int pos) => gridPositions[pos.x,pos.y].transform.position;
+
     [SerializeField] private GridPosition gridPositionPrefab;
     [SerializeField] private Transform gridPositionHolder;
     [SerializeField] private Transform itemHolder;
@@ -61,22 +63,36 @@ public class GameAreaController : MonoBehaviour
         }
     }
 
-    internal void SwapCards(Card mimicedCard, Card targetCard)
+    internal void SwapCards(Card mimicedCard, Card targetCard, bool animate = false)
     {
         Vector2Int fromPos = mimicedCard.PlacedGameAreaPosition.Pos;
         Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
 
-        if(fromPos.x == -1) {
-            // Card is coming from the hand
-            Debug.Log("SWAPFAIL - Returning card to Inventory from position: "+ targetCard.transform.position);
-            InventoryController.Instance.PlaceCard(targetCard,targetCard.transform.position, false);
+        if (CardIndexIndicatesNotInPlayArea(fromPos)) {
+            
+            // Card is coming from the hand - PLace the target card back in the invnetory
+            InventoryController.Instance.PlaceCard(targetCard, targetCard.transform.position, false);
+
+            // And place the dragged card in the playArea
             PlaceCard(mimicedCard, toPos.x, toPos.y, false);
         }
         else {
-            PlaceCard(mimicedCard, toPos.x, toPos.y ,false);
-            PlaceCard(targetCard, fromPos.x, fromPos.y ,false);
+            // Place both cards in each others positions in the playArea
+            PlaceCard(mimicedCard, toPos.x, toPos.y, false);
+            PlaceCard(targetCard, fromPos.x, fromPos.y, false);
+
+            // Animate this
+            if (animate) {
+                Debug.Log("Animate a ghost that moves from the TargetCard to the MimicedCards position");
+                GameController.Instance.AnimateGhostFromTo(targetCard, targetCard, GetGridPositionPositionVector(toPos), GetGridPositionPositionVector(fromPos), null);
+            }
+            else {
+                Debug.Log("Instantly Swap the cards");
+            }
         }
     }
+
+    private static bool CardIndexIndicatesNotInPlayArea(Vector2Int fromPos) => fromPos.x == -1;
 
     internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true)
     {
@@ -168,7 +184,7 @@ public class GameAreaController : MonoBehaviour
                 // Found an empty space
                 PlaceCard(cardToPlace, i, j);
                 
-                GameController.Instance.AnimateGhostFromTo(cardToPlace, cardToPlace, startPos, cardToPlace.transform.position, null, true);
+                GameController.Instance.AnimateGhostFromTo(cardToPlace, cardToPlace, startPos, cardToPlace.transform.position, null);
 
                 return true;
             }

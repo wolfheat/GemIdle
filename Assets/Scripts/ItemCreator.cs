@@ -55,7 +55,7 @@ public class ItemCreator : MonoBehaviour
 
     public Card GenerateCard(int cardID, bool inPlay = true)
     {
-        Debug.Log("Generate card "+cardID);
+        //Debug.Log("Generate card "+cardID);
 
         if(cardID < cardLibrary.Length && cardLibrary[cardID] != null) {
             //Debug.Log("Generated Card Type "+cardID);

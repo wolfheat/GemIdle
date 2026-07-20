@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 using Wolfheat.StartMenu;
 
 public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge, AddMerge, AddImprint, TossCard };
@@ -12,6 +13,7 @@ public struct DropCardAction
     public Vector2 originPosition;
     public Vector2Int dropPositionIndex;
     public Card targetCard;
+    public bool useSpecifiedPosition;
 }
 
 public class GameController : MonoBehaviour
@@ -19,12 +21,13 @@ public class GameController : MonoBehaviour
     private const float TickTime = 1f;
     private float tickTimer = 0f;
 
-    [SerializeField] private BaseCard ghostCard; 
+    [SerializeField] private BaseCard ghostCardDragged; 
     [SerializeField] private Transform ghostHolder; 
 	
+    private BaseCard[] ghostCards; 
 	
 	private Card mimicCard = null;
-    private bool placeHidden = false;
+    //private bool placeHidden = false;
 
 	public static GameController Instance { get; private set; }
 
@@ -68,11 +71,11 @@ public class GameController : MonoBehaviour
 			Vector2Int highlight = GetHighlightIndex();
             GameAreaController.Instance.HighlightSlot(highlight.x,highlight.y);
 
-			ghostCard.transform.position = Mouse.current.position.ReadValue();
+			ghostCardDragged.transform.position = Mouse.current.position.ReadValue();
 
 
             // Scale it to fit the Box
-            RectTransform rect = ghostCard.GetComponent<RectTransform>();
+            RectTransform rect = ghostCardDragged.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
 
 		}
@@ -100,10 +103,10 @@ public class GameController : MonoBehaviour
 
 		// Try instantiating and cloning the dragged card
 
-		if(ghostCard != null)
-			Destroy(ghostCard.gameObject);
+		if(ghostCardDragged != null)
+			Destroy(ghostCardDragged.gameObject);
 
-		ghostCard = Instantiate(cardToDrag, ghostHolder);
+		ghostCardDragged = Instantiate(cardToDrag, ghostHolder);
 
 
 		mimicCard = cardToDrag;
@@ -111,7 +114,7 @@ public class GameController : MonoBehaviour
         mimicCard?.gameObject.SetActive(false);
 
         // Set Ghostcard to mimic this Card
-        ghostCard.Mimic(cardToDrag);
+        ghostCardDragged.Mimic(cardToDrag);
 
 		// Hide the dragged card - fix later
 		if(mimicCard == null)
@@ -159,9 +162,9 @@ public class GameController : MonoBehaviour
     }
     public void PlaceGeneratedCardInInventory(Card card, Vector2 pos)
     {
-        Debug.Log("PLace A Generated Card into Inventory");
+        Debug.Log("Place A Generated Card into Inventory");
         mimicCard = card;
-        placeHidden = true;
+        //placeHidden = true;
         ExecuteDropAction(new DropCardAction() { action = CardAction.PlaceInventory, originPosition = pos });
         mimicCard = null;
     }
@@ -180,7 +183,7 @@ public class GameController : MonoBehaviour
                 SoundMaster.Instance.PlaySound(SoundName.PlaceCard);
                 break;
             case CardAction.PlaceInventory:
-                InventoryController.Instance.PlaceCard(mimicCard, dropCardAction.originPosition, animate: placeHidden);
+                InventoryController.Instance.PlaceCard(mimicCard, dropCardAction.originPosition, useMousePositionToOrder: dropCardAction.useSpecifiedPosition);
                 SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 break;
             case CardAction.TossCard:
@@ -189,7 +192,7 @@ public class GameController : MonoBehaviour
                 SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 break;
             case CardAction.Swap:
-                GameAreaController.Instance.SwapCards(mimicCard, dropCardAction.targetCard);
+                GameAreaController.Instance.SwapCards(mimicCard, dropCardAction.targetCard, true);
                 SoundMaster.Instance.PlaySound(SoundName.PlaceSwap);
                 break;
             case CardAction.Merge:
@@ -224,83 +227,83 @@ public class GameController : MonoBehaviour
 
         Vector2Int localIndex = GetHighlightIndex();
 
-        // Get the card thats already placed at the target Index
-        Card placedCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y);
+        DropCardAction dropCardAction = new DropCardAction()
+        {
+            dropPositionIndex = localIndex,
+            targetCard = GameAreaController.Instance.Occupier(localIndex.x, localIndex.y),
+            action = CardAction.Invalid,
+            originPosition = Mouse.current.position.ReadValue()
+        };
 
-        CardAction cardAction = CardAction.Invalid;
+        // Get the card thats already placed at the target Index
+
+        
 
         // Is there even a card dragged?
         if (mimicCard == null) {
-            cardAction = CardAction.Invalid;
+            dropCardAction.action = CardAction.Invalid;
         }
         else if (OutsidePlayArea(localIndex)) { // Position Index Dropped
             if (BelowPlayArea(localIndex)) {
                 if (InventoryController.Instance.CanAddCard()) {
-                    cardAction = CardAction.PlaceInventory;
+                    dropCardAction.action = CardAction.PlaceInventory;
+                    dropCardAction.useSpecifiedPosition = true;
                 }
                 else
-                    cardAction = CardAction.Invalid;
+                    dropCardAction.action = CardAction.Invalid;
             }
-            else if (OverTossDeck(localIndex)) {
-                cardAction = CardAction.TossCard;                
+            else if (DrawCardController.Instance.IsOverTossArea()) {
+                dropCardAction.action = CardAction.TossCard;                
             }
             else {
-                cardAction = CardAction.Invalid;
+                dropCardAction.action = CardAction.Invalid;
             }
-        }else if(placedCard == null) {
-            cardAction = CardAction.PlaceGameArea;
+        }else if(dropCardAction.targetCard == null) {
+            dropCardAction.action = CardAction.PlaceGameArea;
         }
-        else if (mimicCard.PlacedGameAreaPosition.Pos.x == localIndex.x &&mimicCard.PlacedGameAreaPosition.Pos.y == localIndex.y) {
-            cardAction = CardAction.Invalid;
+        else if (mimicCard.PlacedGameAreaPosition.Pos.x == localIndex.x && mimicCard.PlacedGameAreaPosition.Pos.y == localIndex.y) {
+            dropCardAction.action = CardAction.Invalid;
         }
-        else if (CanAddMerge(placedCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
+        else if (CanAddMerge(dropCardAction.targetCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
             Debug.Log("Can Add Merge");
-            cardAction = CardAction.AddMerge;
+            dropCardAction.action = CardAction.AddMerge;      
         }
-        else if (CanAddImprint(placedCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
+        else if (CanAddImprint(dropCardAction.targetCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
             Debug.Log("Can Add Imprint");
-            cardAction = CardAction.AddImprint;
+            dropCardAction.action = CardAction.AddImprint;
         }
-        else if (CanMerge(placedCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
+        else if (CanMerge(dropCardAction.targetCard, mimicCard)) { // A Card was at that spot - Check if the can Merge or should be Swapped
             Debug.Log("Can Merge");
-            cardAction = CardAction.Merge;
+            dropCardAction.action = CardAction.Merge;
         }
         else {
-            cardAction = CardAction.Swap;
+            dropCardAction.action = CardAction.Swap;
         }
 
-        return new DropCardAction() {dropPositionIndex = localIndex, targetCard = placedCard, action = cardAction, originPosition = Mouse.current.position.ReadValue(),
-        };
+        return dropCardAction;
     }
 
-    private bool OverTossDeck(Vector2Int localIndex) => DrawCardController.Instance.IsOverTossArea();
-
+    // Card Checks
     private bool CanAddMerge(Card placedCard, Card mimicCard) => (mimicCard.HasImprint && placedCard.IsIncomeCard) || (mimicCard.IsIncomeCard && placedCard.HasImprint);
     private bool CanAddImprint(Card placedCard, Card mimicCard) => (mimicCard.IsAddCard && placedCard.IsIncomeCard) || (mimicCard.IsIncomeCard && placedCard.IsAddCard);
     private bool CanMerge(Card placedCard, Card mimicCard) => (mimicCard.IsMultiplier || placedCard.IsMultiplier) && (mimicCard.AcceptsMerge && placedCard.AcceptsMerge);
-    
-    private void HideGhost() => ghostCard.gameObject.SetActive(false);
+    private static bool BelowPlayArea(Vector2Int localIndex) => localIndex.y >= 5;
+    private static bool OutsidePlayArea(Vector2Int localIndex) => localIndex.x < 0 || localIndex.y < 0 || localIndex.x >= 7 || localIndex.y >= 5;
 
-    private static bool BelowPlayArea(Vector2Int localIndex)
-    {
-        return localIndex.y >= 5;
-    }
+    private void HideGhost() => ghostCardDragged.gameObject.SetActive(false);
 
-    private static bool OutsidePlayArea(Vector2Int localIndex)
-    {
-        return localIndex.x < 0 || localIndex.y < 0 || localIndex.x >= 7 || localIndex.y >= 5;
-    }
 
-    private void Merge(Card placedCard, Card mimicCard)
+    // Card Actions
+    private void Merge(Card placedCard, Card draggedCard)
     {
         // If this is a multiplier and merging with normal card the merge is more difficult
         // Might need to move the other card to this position and then apply the mult
-        Debug.Log("Merge "+mimicCard.name+" onto "+ placedCard);
+        Debug.Log("Normal Multiplier Merge "+draggedCard.name+" onto "+ placedCard);
 
         if (placedCard.IsMultiplier) {
-            Debug.Log("Swap First");
-            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
-            (placedCard,mimicCard) = (mimicCard,placedCard);
+            Debug.Log("Merge - Swap First");
+            GameAreaController.Instance.SwapCards(draggedCard, placedCard);
+            (placedCard,draggedCard) = (draggedCard,placedCard);
         } 
 
         ApplyMultToPlacedCard();
@@ -309,46 +312,66 @@ public class GameController : MonoBehaviour
 
         void ApplyMultToPlacedCard()
         {
-            int multiplier = mimicCard.Multiplier;
-
-            placedCard.MultiplyBy(multiplier);
+            placedCard.MultiplyBy(draggedCard.Multiplier);
 
             // Remove The Card
-            TossCard(mimicCard, true , placedCard.transform.position);
+            TossCard(draggedCard, true , placedCard.transform.position);
         }
     }
 
-    private void AddMerge(Card placedCard, Card mimicCard)
+    private void AddMerge(Card placedCard, Card draggedCard)
     {
         // Merge value is added to the Income card
+        /*
         if (mimicCard.IsIncomeCard) { // Place Income Card in the Target Position
-            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
+        
+            // If AddMerging and the moved card is
+        
+            if (mimicCard.IsUnplaced)
+                GameAreaController.Instance.PlaceCard(mimicCard, placedCard.PlacedGameAreaPosition.Pos.x, placedCard.PlacedGameAreaPosition.Pos.y, false);
+            else
+                GameAreaController.Instance.SwapCards(mimicCard, placedCard, false);
             (placedCard,mimicCard) = (mimicCard,placedCard);
-            Debug.Log("Swap Before Add Merging");
-        } 
-
-        ApplyAddonToPlacedCard();
-
-        return;
-
-        void ApplyAddonToPlacedCard()
-        {
-            int add = mimicCard.AddValue;
-
-            placedCard.AddToIncome(add); // Doesnt really multiply
-
-            // Remove The Card - Throw in TossPile
-            TossCard(mimicCard, true, placedCard.transform.position);
+            
+        }*/
+        if (placedCard.IsAddCard) {
+            Debug.Log("AddMerge - Swap First");// replace with imprint card
+            if (mimicCard.PlacedGameAreaPosition.Pos.x == -1) {
+                GameAreaController.Instance.PlaceCard(mimicCard, placedCard.PlacedGameAreaPosition.Pos.x, placedCard.PlacedGameAreaPosition.Pos.y, false);
+                Debug.Log("Imprint - Place the Inventory card at gameArea ");
+            }
+            else {
+                GameAreaController.Instance.SwapCards(mimicCard, placedCard, false);
+                Debug.Log("Imprint - swap, both cards are at the gameArea");
+            }
+            (placedCard, draggedCard) = (draggedCard, placedCard);
         }
+
+        placedCard.AddToIncome(draggedCard.AddValue);
+
+        Debug.Log("Addmerge - Call Toss Card - from targetPosition [" + placedCard.transform.position + "]");
+        // Store Card ID in tossPile
+        Stats.AddTossCard(draggedCard, true, placedCard.transform.position);
     }
     
-    private void AddImprint(Card placedCard, Card mimicCard)
+    private void AddImprint(Card placedCard, Card draggedCard)
     {
-        // Imprint is added to the Adder card
-        if (placedCard.IsIncomeCard) { // replace with adder
-            GameAreaController.Instance.SwapCards(mimicCard, placedCard);
-            (placedCard,mimicCard) = (mimicCard,placedCard);
-        } 
+        Vector2 targetPosition = placedCard.transform.position;
+        // Imprint card is kept
+        if (placedCard.IsIncomeCard) { // replace with imprint card
+            if(draggedCard.IsUnplaced) { // Inventory 
+                GameAreaController.Instance.PlaceCard(draggedCard, placedCard.PlacedGameAreaPosition.Pos.x, placedCard.PlacedGameAreaPosition.Pos.y, false);
+                Debug.Log("Imprint - Place the Inventory card at gameArea ");
+            }
+            else {
+                GameAreaController.Instance.SwapCards(draggedCard, placedCard, false);
+                Debug.Log("Imprint - swap, both cards are at the gameArea");
+            }
+            (placedCard,draggedCard) = (draggedCard,placedCard);
+        }
+        else {
+            Debug.Log("Imprint - No Swap needed");
+        }
 
         ApplyAddonToPlacedCard();
 
@@ -356,17 +379,20 @@ public class GameController : MonoBehaviour
 
         void ApplyAddonToPlacedCard()
         {
-            int add = mimicCard.GetIncomeGain();
-
-            placedCard.MultiplyBy(add); // Doesnt really multiply
+            placedCard.MultiplyBy(draggedCard.GetIncomeGain()); // Doesnt really multiply
 
             // Remove The Card
-            TossCard(mimicCard, true, placedCard.transform.position);
+            //TossCard(mimicCard, true, placedCard.transform.position);
+
+            // Store Card ID in tossPile
+            Debug.Log("Imprint - Call Toss Card - from targetPosition ["+placedCard.PlacedGameAreaPosition.Pos+"]");
+            Stats.AddTossCard(draggedCard, true, targetPosition);
         }
     }
 
     public static void TossCard(Card card, bool animate = true, Vector3 position = default)
     {
+        Debug.Log("Tossing Card "+card.name+" active: "+card.gameObject.activeSelf);
         // Move to Toss
         card.UnsetPositionIndex();
 
@@ -374,7 +400,7 @@ public class GameController : MonoBehaviour
         Stats.AddTossCard(card, animate, position); 
     }
     
-    internal void AnimateGhostFromTo(Card cardToPlace, Card cardToMimic, Vector3 fromPos, Vector2 toPos, Action callback, bool hideDuringTransition = true)
+    internal void AnimateGhostFromTo(Card cardToPlace, Card cardToMimic, Vector2 fromPos, Vector2 toPos, Action callback)
     {
         // Do animation
         Debug.Log("Animating Ghost card from position "+fromPos+" to " + toPos);
@@ -384,38 +410,39 @@ public class GameController : MonoBehaviour
         // Local Coroutine Method
         IEnumerator Animate()
         {
-         
+            // Get a new GhostCard
+            BaseCard ghostCard = GetGhostCard(cardToMimic,cardToPlace);
+            ghostCard.transform.position = fromPos;
             ghostCard.gameObject.SetActive(true);
+            yield return null;
 
-            Debug.Log("Animating Ghost mimicing: " + cardToPlace.ID);
+            cardToPlace.HideVisuals();
+            
+            Debug.Log("Animate Ghost visible: "+ ghostCard.gameObject.activeSelf);
 
-            if (ghostCard != null)
-                Destroy(ghostCard.gameObject);
-
-            ghostCard = Instantiate(cardToMimic, ghostHolder);
-            ghostCard.Mimic(cardToPlace);
-
-
-            if (hideDuringTransition) {
-                Debug.Log("Hiding Actual Parts Of Card during animation");
-                cardToPlace.HideVisuals();
-            }
-
-            float t = 0;
+            float animationTime = !GameStats.UseSpeed ? GameStats.AnimationTime : Vector2.Distance(fromPos, toPos) / GameStats.AnimationSpeed;
                         
-            while (t < GameStats.AnimationTime) {
+            float t = 0;
+            while (t < animationTime) {
                 t += Time.deltaTime;
-                ghostCard.transform.position = Vector3.Lerp(fromPos, toPos, t/GameStats.AnimationTime);
+                ghostCard.transform.position = Vector3.Lerp(fromPos, toPos, t/animationTime);
                 yield return null;
             }
 
-            ghostCard.gameObject.SetActive(false);
+            Destroy(ghostCard.gameObject);
 
-            if (hideDuringTransition)
+            if (callback == null) // Handle not showing card if there is a callback, since that is destroying the card
                 cardToPlace.ShowVisuals();
 
             // Return to Callback
             callback?.Invoke();
         }
+    }
+
+    private BaseCard GetGhostCard(Card cardToMimic, Card cardToPlace)
+    {
+        Card newCard = Instantiate(cardToMimic, ghostHolder);
+        newCard.Mimic(cardToPlace);
+        return newCard;
     }
 }

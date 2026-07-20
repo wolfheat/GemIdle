@@ -26,7 +26,7 @@ public class DotTimer : MonoBehaviour
 
     private void ResetAllDots()
     {
-        Debug.Log("Resetting all Dots "+timerDots.Length);
+        //Debug.Log("Resetting all Dots "+timerDots.Length);
         foreach (var dot in timerDots) {
             dot.color = unLit;
         }

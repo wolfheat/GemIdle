@@ -43,7 +43,10 @@ Jun 2026
 		* Tried different card background motive
 		* Fixed merging animating from wrong position
 17/7	* Card Style Change
-					
+18/7	*		
+
+
+		* Make it possible to animate several ghost cards 
 
 
 		* Figure out how to handle moving cards from draw deck to inventory

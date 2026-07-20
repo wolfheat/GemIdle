@@ -12,6 +12,8 @@ public static class GameStats
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
     public const float AnimationTime = 0.15f;
+    public const float AnimationSpeed = 1000f;
+    public const bool UseSpeed = true;
 }
 
 public static class Stats
@@ -191,7 +193,7 @@ public static class Stats
     {
         if (animate) {
             // Don't animate the actual card, use the ghost for this
-
+            Debug.Log("ANIMATE the ghost to the TossPile from: "+position + " to TOssPile "+ DrawCardController.Instance.GetTossPilePosition());
             // Animate Ghost from cards position to TossPile Position
             GameController.Instance.AnimateGhostFromTo(card, card, position != default ? position : card.transform.position, DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
         }

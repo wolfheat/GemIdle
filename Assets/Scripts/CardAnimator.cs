@@ -31,6 +31,8 @@ public class CardAnimator : MonoBehaviour
     
     internal void ForcedAnimate()
     {
+        if (!gameObject.activeSelf) return;
+
         StopAllCoroutines();
         animateRoutine = StartCoroutine(UpdateAnimateCO());
     }

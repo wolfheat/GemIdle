@@ -75,13 +75,13 @@ public class DrawCardController : MonoBehaviour
         // Just show the correct parts of the visuals
         int amt = Math.Min(3, Stats.Deck.Count);
         
-        Debug.Log("DECK: Deck Visuals should show " + amt + " cards.");
+        //Debug.Log("DECK: Deck Visuals should show " + amt + " cards.");
         
         int offset = 3;
         for (int i = 0; i < 3; i++) {
             offset--;
             
-            Debug.Log("DECK: Card: " + i+ " = Active: "+ (amt > i));
+            //Debug.Log("DECK: Card: " + i+ " = Active: "+ (amt > i));
             
             drawPileVisuals[i].SetActive(amt > offset ? true : false);
 
@@ -105,17 +105,17 @@ public class DrawCardController : MonoBehaviour
         RemoveOldCards();
         List<int> tossPile = new List<int>(Stats.Toss);
         tossPile.Reverse();
-        Debug.Log("TOSS: Updating TossPile cards: " + tossPile.Count);
+        //Debug.Log("TOSS: Updating TossPile cards: " + tossPile.Count);
         int amt = tossPile.Count;
         int startIndex = amt - 3;
         int offsets = 3;
         for (int i = startIndex; i < amt; i++) {
-            Debug.Log("TOSS: Index: " + i+"  offsets:" + offsets);
+            //Debug.Log("TOSS: Index: " + i+"  offsets:" + offsets);
             offsets--;
             
             if (i < 0) continue;
 
-            Debug.Log("TOSS: Index: " + i+"  Create Card!");
+            //Debug.Log("TOSS: Index: " + i+"  Create Card!");
 
             Card card = GetTossCardVisual(offsets, tossPile[i]);
         }
