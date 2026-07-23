@@ -9,6 +9,8 @@ public class BaseCard : MonoBehaviour
     [SerializeField] protected Image border;
     [SerializeField] protected TextMeshProUGUI descriptionText;
     [SerializeField] protected GameObject actualCardPart;
+    [SerializeField] private bool inPlay = true;
+    public bool InPlay { get => inPlay; set => inPlay = value; }
 
     internal void Mimic(Card cardToDrag)
     {

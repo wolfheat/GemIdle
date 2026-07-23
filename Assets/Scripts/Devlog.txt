@@ -43,11 +43,17 @@ Jun 2026
 		* Tried different card background motive
 		* Fixed merging animating from wrong position
 17/7	* Card Style Change
-18/7	*		
+23/7	* Complete3d new Move system for the game
+		* Added Itch page with Web build
 
+		* Change the system to have each aniamtion target a real card, and if it moves its direction also change.
+
+		New System, AnyCard That moves starts by hiding its graphic
+		* Any move is happening instantly
+		* Animate A ghostcard to that position
+		* Re enable the hidden graphics
 
 		* Make it possible to animate several ghost cards 
-
 
 		* Figure out how to handle moving cards from draw deck to inventory
 		
@@ -55,7 +61,6 @@ Jun 2026
 
 		* If there is no toss cards, then there is no option to shuffle them ?
 		* Should we have unique cards that only can appear once, and normal cards that can have duplicates?
-
 
 		* Make animations when placing Cards in draw pile toss and shuffle
 

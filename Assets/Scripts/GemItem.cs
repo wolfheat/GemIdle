@@ -13,10 +13,11 @@ public class GemItem : MonoBehaviour
 
     [SerializeField] private ItemGrowAnimator[] itemGrowAnimators;
 
-    private void Awake()
-    {
-        Stats.GemUpdate += OnGemsUpdated;
-    }
+
+    private void OnEnable() => Stats.GemUpdate += OnGemsUpdated;
+
+    private void OnDisable() => Stats.GemUpdate -= OnGemsUpdated;
+
 
     private void OnGemsUpdated(GemType type)
     {

@@ -5,17 +5,18 @@ using Wolfheat.StartMenu;
 
 public class GameAreaController : MonoBehaviour
 {
-
     private GridPosition[,] gridPositions;
     private Card[,] placedCards;
 
-    public Vector2 GetGridPositionPositionVector(Vector2Int pos) => gridPositions[pos.x,pos.y].transform.position;
+    public Vector2 GetGridPositionPositionVector(Vector2Int pos) => GridPositions[pos.x,pos.y].transform.position;
 
     [SerializeField] private GridPosition gridPositionPrefab;
     [SerializeField] private Transform gridPositionHolder;
     [SerializeField] private Transform itemHolder;
 
     public static GameAreaController Instance { get; private set; }
+    public GridPosition[,] GridPositions { get => gridPositions; set => gridPositions = value; }
+    public Card[,] PlacedCards { get => placedCards; set => placedCards = value; }
 
     private void Awake()
     {
@@ -41,12 +42,12 @@ public class GameAreaController : MonoBehaviour
             Destroy(t.gameObject);
         }
 
-        gridPositions = new GridPosition[GameStats.Width, GameStats.Height];
+        GridPositions = new GridPosition[GameStats.Width, GameStats.Height];
 
         for (int j = 0; j < GameStats.Height; j++) {
             for (int i = 0; i < GameStats.Width; i++) {
                 GridPosition gridPos = Instantiate(gridPositionPrefab, gridPositionHolder);
-                gridPositions[i, j] = gridPos;
+                GridPositions[i, j] = gridPos;
                 gridPos.name = "GridPos: ("+i+","+j+")";
             }
         }
@@ -55,20 +56,50 @@ public class GameAreaController : MonoBehaviour
     internal void NoHighlight() => HighlightSlot(-1, -1);
     internal void HighlightSlot(int xPos, int yPos)
     {
-
         for (int j = 0; j < GameStats.Height; j++) {
             for (int i = 0; i < GameStats.Width; i++) {
-                gridPositions[i, j].HighLight(xPos == i && yPos == j);
+                GridPositions[i, j].HighLight(xPos == i && yPos == j);
             }
         }
     }
 
+    internal void SwapCards(Card card, Card targetCard, bool animate = false)
+    {
+        Debug.Log("SWAP Cards in GameArea");
+        Vector2Int fromPos = card.PlacedGameAreaPosition.Pos;
+        Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
+        Vector2 toPosGlobal = GetGridPositionPositionVector(toPos);
+
+        if (card.IsPlaced) { 
+            // Place both cards in each others positions in the playArea
+            PlaceCard(card, toPos.x, toPos.y, false);
+            PlaceCard(targetCard, fromPos.x, fromPos.y, false);
+
+            if (animate) {
+                card.HideVisuals();
+                targetCard.HideVisuals();
+
+                GameController.Instance.AnimateGhostFromTo(card, MouseUtils.MousePosition);
+                GameController.Instance.AnimateGhostFromTo(targetCard, toPosGlobal);
+            }
+
+        }
+        else {
+
+            // Card is coming from the hand - Place the target card back in the inventory
+            InventoryController.Instance.PlaceCard(targetCard, toPosGlobal, false);
+
+            // And place the dragged card in the playArea
+            PlaceCard(card, toPos.x, toPos.y, false);
+        }
+    }
+    /*
     internal void SwapCards(Card mimicedCard, Card targetCard, bool animate = false)
     {
         Vector2Int fromPos = mimicedCard.PlacedGameAreaPosition.Pos;
         Vector2Int toPos = targetCard.PlacedGameAreaPosition.Pos;
 
-        if (CardIndexIndicatesNotInPlayArea(fromPos)) {
+        if (mimicedCard.IsPlacedInGameArea()) {
             
             // Card is coming from the hand - PLace the target card back in the invnetory
             InventoryController.Instance.PlaceCard(targetCard, targetCard.transform.position, false);
@@ -90,10 +121,28 @@ public class GameAreaController : MonoBehaviour
                 Debug.Log("Instantly Swap the cards");
             }
         }
+    }*/
+
+
+    internal void PlaceCard(Card card, int xPos, int yPos, bool unsetOldPosition = true)
+    {
+        Debug.Log("GameArea - Placing Card " + card.name + " Position: " + xPos+","+yPos);
+        
+        card.transform.parent = itemHolder.transform;
+
+        // Get the gridPosition to place the card at        
+        card.transform.position = GridPositions[xPos, yPos].transform.position;
+
+        RemoveOldPlacementIndex(card, unsetOldPosition);
+
+        card.SetPlace(xPos, yPos);
+
+        card.SetScale();
+
+        placedCards[xPos, yPos] = card;
     }
 
-    private static bool CardIndexIndicatesNotInPlayArea(Vector2Int fromPos) => fromPos.x == -1;
-
+    /*
     internal void PlaceCard(Card mimicedCard, int xPos, int yPos, bool unsetOldPosition = true)
     {
         // Unset its old position?  Not needed if only reference to it is it being a child - might change later
@@ -120,16 +169,18 @@ public class GameAreaController : MonoBehaviour
 
         placedCards[xPos, yPos] = mimicedCard;
 
-    }
+    }*/
 
-    public void RemoveOldPlacementIndex(Card mimicedCard, bool unsetOldPosition = true)
+    public void RemoveOldPlacementIndex(Card card, bool unsetOldPosition = true)
     {
         // If it was placed, remove old placement
-        Vector2Int oldPos = mimicedCard.PlacedGameAreaPosition.Pos;
-        if (oldPos.x != -1) {
-            if(unsetOldPosition)
+        Vector2Int oldPos = card.PlacedGameAreaPosition.Pos;
+        if (card.IsPlaced) {
+            if (unsetOldPosition) {
+                Debug.Log("GameArea - Unregister Card Placement in GameArea: "+oldPos);
                 placedCards[oldPos.x, oldPos.y] = null;
-            mimicedCard.Place(-1, -1);
+            }
+            card.SetPlace(-1, -1);
         }
     }
 
@@ -174,7 +225,7 @@ public class GameAreaController : MonoBehaviour
     private bool IndexOutsidePlacedCardsArray(int x, int y) => (x < 0 || x >= placedCards.GetLength(0) || y < 0 || y >= placedCards.GetLength(1));
     
     internal bool PlaceCardOnFirstEmptySpot(Card cardToPlace)
-    {
+    {   
         Vector2 startPos = cardToPlace.transform.position;
 
         for (int j = 0; j < GameStats.Height; j++) {
@@ -182,9 +233,11 @@ public class GameAreaController : MonoBehaviour
                 if (placedCards[i, j] != null) continue;
 
                 // Found an empty space
+                cardToPlace.HideVisuals();
+
                 PlaceCard(cardToPlace, i, j);
                 
-                GameController.Instance.AnimateGhostFromTo(cardToPlace, cardToPlace, startPos, cardToPlace.transform.position, null);
+                GameController.Instance.AnimateGhostFromTo(cardToPlace, startPos);
 
                 return true;
             }

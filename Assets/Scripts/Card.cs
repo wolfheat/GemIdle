@@ -15,11 +15,12 @@ public class GameAreaPosition
 public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 {
 
-    [SerializeField] private bool inPlay = true;
     [SerializeField] private CardData cardData;    
     [SerializeField] private DotTimer dotTimer;
     [SerializeField] private TextMeshProUGUI gainTextField;
+
     
+
     public const float MoveTime = 0.25f;
 
     private bool isDragged = false;
@@ -48,7 +49,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     {
         GameAreaController.Instance.RemoveOldPlacementIndex(this);
 
-        Place(-1, -1);
+        SetPlace(-1, -1);
 
         if(gameObject.TryGetComponent(out CardAnimator animator))
             animator.ResetScale();
@@ -56,7 +57,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     private void Start()
     {
-        if (!inPlay) {
+        if (!InPlay) {
             // Do deckbuilding stuff here instead
             if (cardData == null) return;
 
@@ -70,8 +71,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     {
         if (eventData.button == PointerEventData.InputButton.Middle) return;
 
-            Debug.Log("Clicking Card: "+cardData.name);
-        if (!inPlay) {
+           // Debug.Log("Clicking Card: "+cardData.name);
+        if (!InPlay) {
             // Do deckbuilding stuff here instead
             Debug.Log("Card not in play: ");
             return;
@@ -90,7 +91,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             }
             else {
                 if (InventoryController.Instance.CanAddCard()) {
-                    InventoryController.Instance.PlaceCard(this,this.transform.position,true,false);
+                    InventoryController.Instance.PlaceCard(this,transform.position,false);
+                    //InventoryController.Instance.PlaceCard(this,this.transform.position,true,false);
                     SoundMaster.Instance.PlaySound(SoundName.PickupCard);
                 }
                 else {
@@ -101,7 +103,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
             return;
         }
 
-        Debug.Log("Start To Drag Item");
+        //Debug.Log("Start To Drag Item");
 
         isDragged = true;
 
@@ -113,11 +115,11 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     {
         if (eventData.button == PointerEventData.InputButton.Middle) return;
 
-        if (!inPlay) {
+        if (!InPlay) {
             // Do deckbuilding stuff here instead
             return;
         }
-        Debug.Log("Stop Drag Item");
+        //Debug.Log("Stop Drag Item");
         isDragged = false;
 
         GameController.Instance?.StopDrag();
@@ -173,8 +175,8 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
                 break;
             case AddCardData:
                 image.sprite = cardData.Image;
-                Debug.Log("GainTextField: "+gainTextField);
-                Debug.Log("GainTextField.text: "+gainTextField.text);
+                //Debug.Log("GainTextField: "+gainTextField);
+                //Debug.Log("GainTextField.text: "+gainTextField.text);
                 gainTextField.text = "";
                 break;
             case DeadCardData:
@@ -205,12 +207,12 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         };
     }
 
-    internal void Place(int xPos, int yPos)
+    internal void SetPlace(int xPos, int yPos)
     {
         if (!gameObject.activeSelf)
             ReactivateCard();
 
-        if (!inPlay) {
+        if (!InPlay) {
             // Do deckbuilding stuff here instead
             return;
         }
@@ -222,7 +224,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     internal void Tick()
     {
-        if (!inPlay) {
+        if (!InPlay) {
             // Do deckbuilding stuff here instead
             return;
         }
@@ -280,33 +282,33 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     }
 
-    internal void DisableInPlay() => inPlay = false;
+    internal void DisableInPlay() => InPlay = false;
 
-    public void MultiplyBy(int multiplier)
+    public void ResolveMerge(int multiplier)
     {
-        Debug.Log("Applying Multiplier: "+multiplier);
+        Debug.Log("ResolveMerge - Applying Multiplier: " + multiplier);
         if (cardData is GainerCardData) {
             currentIncome *= multiplier;
             currentMultiplier *= multiplier;
-            Debug.Log("Multiplying Gainer card");
+            Debug.Log("ResolveMerge - Multiplying Gainer card");
         }
         else if (cardData is MultiplyCardData) {
             currentMover *= multiplier;
             currentMultiplier *= multiplier;
-            Debug.Log("Multiplying Multiply card");
+            Debug.Log("ResolveMerge - Multiplying Multiply card");
         }
         else if (cardData is MoverCardData) {
             currentMover *= multiplier;
-            Debug.Log("Multiplying Mover card");
+            Debug.Log("ResolveMerge - Multiplying Mover card");
         }
         else if (cardData is AddCardData) {
             currentAddValue = multiplier;
-            Debug.Log("Setting the Add cards add value");
+            Debug.Log("ResolveMerge - Setting the Add cards add value");
         }
         else {
             currentIncome *= multiplier;
             currentMultiplier *= multiplier;
-            Debug.Log("Multiplying Normal Card");
+            Debug.Log("ResolveMerge - Multiplying Normal Card");
         }
 
         UpdateTextsOnCard();
@@ -322,20 +324,23 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
         UpdateTextsOnCard();
     }
 
-    internal void SetScale()
+    internal void SetScaleDelayed()
     {
         // Need to do this delayed
         StartCoroutine(DelayedScale());
+    }
+    internal void SetScale()
+    {
+        RectTransform rect = GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
+        rect.localScale = Vector3.one;
     }
 
     private IEnumerator DelayedScale()
     {
         yield return null;
         // Scale it to fit the Box
-        RectTransform rect = GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(GameStats.BoxWidth, GameStats.BoxHeight);
-        rect.localScale = Vector3.one;
-        //Debug.Log("Scaling card to "+GameStats.BoxWidth+","+GameStats.BoxHeight);
+        SetScale();
     }
 
     internal void AnimateToPosition(Vector2 endPos, Action callback, bool local = false) => StartCoroutine(AnimateToPositionCO(endPos, callback, local));
@@ -361,5 +366,7 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
     }
 
     internal void Destroy() => Destroy(gameObject);
+
+    internal bool IsPlaced => PlacedGameAreaPosition.Pos.x > -1;
 
 }

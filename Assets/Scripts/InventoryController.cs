@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Wolfheat.StartMenu;
 
 public class InventoryController : MonoBehaviour
@@ -32,7 +32,58 @@ public class InventoryController : MonoBehaviour
         }
         Instance = this;
     }
+
+    internal void PlaceCard(Card card, Vector2 origin, bool useMousePositionForPlacement = true) // Only do this if it is valid = just execute
+    {
+        Debug.Log("Place a Card - Inventory ");
+
+        //origin = card.transform.position;
         
+        // Hide card, should be done automatically for all cards?
+        card.HideVisuals();
+
+        // Part to animate Inventory
+        List<Card> cards = itemHolder.GetComponentsInChildren<Card>().ToList();
+        List<Vector2> cardsOrigin = (cards.Select(x => (Vector2)x.transform.position)).ToList();
+
+        for (int i = 0; i < cards.Count; i++) {
+            cards[i].HideVisuals();
+        }
+
+        card.transform.parent = itemHolder;
+
+        if (useMousePositionForPlacement) {
+            int order = GetInventoryOrderByMousePosition();
+            card.transform.SetSiblingIndex(order);
+        }
+
+        // Position Fix
+        card.transform.localPosition = Vector2.zero;
+        // Needed ??
+        //card.SetPlace(-1, -1);
+        //card.SetScale();
+        card.ReactivateCard();
+        card.UnsetPositionIndex();
+
+        // Wait one frame for layoutgroup update to get new target position
+        StartCoroutine(DelayedAnimationRoutine());
+
+
+        IEnumerator DelayedAnimationRoutine()
+        {
+            yield return null;
+
+            for (int i = 0; i < cards.Count; i++) {
+                GameController.Instance.AnimateGhostFromTo(cards[i], cardsOrigin[i]);
+            }
+
+
+            Debug.Log("Animate Ghost Here");
+            GameController.Instance.AnimateGhostFromTo(card, origin);
+            //GameController.Instance.AnimateGhostFromTo(card, copy, startPos, cardToPlace.transform.position, null);
+        }
+    }
+    /*
     internal void PlaceCard(Card cardToPlace, Vector2 startPos, bool unsetOldPosition = true, bool useMousePositionToOrder = true, bool animate = true)
     {
         // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
@@ -66,11 +117,11 @@ public class InventoryController : MonoBehaviour
             yield return null;
             GameController.Instance.AnimateGhostFromTo(cardToPlace, copy, startPos,cardToPlace.transform.position, null);
         }
-    }
+    }*/
 
     private int GetInventoryOrderByMousePosition()
     {
-        Vector2 mousePos = Mouse.current.position.ReadValue();
+        Vector2 mousePos = MouseUtils.MousePosition;
 
         int finalIndex = 0;
         for (int i = 0; i < itemHolder.childCount; i++) {
@@ -118,13 +169,13 @@ public class InventoryController : MonoBehaviour
 
     private void GenerateCard(GemType type, int subType = 0)
     {
-        Debug.Log("GenerateCard "+type);
+        //Debug.Log("GenerateCard "+type);
         Card card = ItemCreator.Instance.GenerateCard(type, subType);
         if(card == null) {
             Debug.Log("No Card Generated");
             return;
         }
-        Debug.Log("Generated a Card of type: "+type.ToString()+" and subtype: "+subType+" name: " + card.name); 
+        Debug.Log("Generating Card: "+subType+" name: " + card.name); 
 
         GameController.Instance.PlaceGeneratedCardInInventory(card, DrawCardController.Instance.GetDeckPosition());
     }
@@ -133,12 +184,4 @@ public class InventoryController : MonoBehaviour
 
     internal Vector2 GetPosition() => itemHolder.transform.position;
 
-    internal void ActivateTempCard()
-    {
-        tempCard.gameObject.SetActive(true);
-    }
-    internal void ReplaceTempCard()
-    {
-        tempCard.gameObject.SetActive(false);
-    }
 }

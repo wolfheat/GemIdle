@@ -20,7 +20,8 @@ namespace Wolfheat.StartMenu
         PickupCard,
         DrawCard,
         MergeCards, 
-        Shuffle
+        Shuffle,
+        ShuffleShort
     }
 
     public enum MusicName {MenuMusic, OutDoorMusic, IndoorMusic, DeadMusic, CreditsMusic, BossMusic}
@@ -241,7 +242,7 @@ namespace Wolfheat.StartMenu
                 if (!allowInterupt && soundsDictionary[name].audioSource.isPlaying && !soundsDictionary[name].loop)
                     return;
                 
-                Debug.Log("Start Sound: "+name);
+                //Debug.Log("Start Sound: "+name);
                 
                 soundsDictionary[name].audioSource.Play();
             }

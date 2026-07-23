@@ -12,7 +12,8 @@ public static class GameStats
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
     public const float AnimationTime = 0.15f;
-    public const float AnimationSpeed = 1000f;
+    public const float AnimationSpeed = 300f;
+    //public const float AnimationSpeed = 1000f;
     public const bool UseSpeed = true;
 }
 
@@ -26,12 +27,13 @@ public static class Stats
     internal static int[] CurrentDeck;
 
     internal static Stack<int> Deck = new();
-    internal static Stack<int> Toss = new();
+    //internal static Stack<int> Toss = new();
 
     internal static bool AnimateCards = false;
 
     public static bool IsPaused { get; internal set; }
     public static int TopCardID => Deck.Count == 0 ? -1 : Deck.Peek();
+    public static bool DeckHasCards => Deck.Count > 0;
     public static int CurrentDeckCards => CurrentDeck.Sum();
 
     public static bool MusicIsOn = false;
@@ -54,9 +56,6 @@ public static class Stats
         OwnedCards[3] = 2;
         OwnedCards[4] = 2;
     }
-
-
-
 
     public static void AddGems(GemType type, int amt = 1)
     {
@@ -95,13 +94,8 @@ public static class Stats
     internal static void ScrambleDeckFromCurrentDeck()
     {
         Deck.Clear();
-        Toss.Clear();
-
-        // Testadd Toss pile cards
-        Toss.Push(1);
-        Toss.Push(2);
-        Toss.Push(3);
-
+        //Toss.Clear();
+                
         List<int> cards = new List<int>();
 
         for (int i = 0; i < CurrentDeck.Length; i++) {
@@ -121,10 +115,10 @@ public static class Stats
         // Could Use Fisher-Yates Shuffle if allowing many cards in the deck.
     }
     
-    internal static void ScrambleTossPile()
-    {        
+    internal static void ShuffleTossPileIntoDrawDeck(List<Card> cardsIn)
+    {
         // Get Toss Cards
-        List<int> cards = new List<int>(Toss);
+        List<int> cards = cardsIn.Select(x => x.ID).ToList();
 
         // Could Use Fisher-Yates Shuffle if allowing many cards in the deck.
         cards = FisherYatesShuffle(ref cards);
@@ -132,34 +126,7 @@ public static class Stats
         // Place Shuffled Toss Cards in Deck
         Deck = new Stack<int>(cards);
 
-        // Reset Toss Cards
-        Toss = new Stack<int>();
-
-        /*
-        int health = 3;
-
-        float hearts = health / 2;
-
-        int charge = 3; // max 4
-        
-        int hitTaken = 3; // max 4
-        float chargeHitTaken = hitTaken / 2;
-
-        RemoveHits(chargeHitTaken);
-
-        void RemoveHits(int hitTaken)
-        {
-            // remove all charge if available
-            charge -= hitTaken;
-            hitTaken -= ;
-            int fullHeartsRemoved = hitTaken / 4;
-            int remainingCharge = hitTaken % 4;
-            hearts -= 
-        }
-        */
-
-
-        SoundMaster.Instance.PlaySound(SoundName.Shuffle);
+        SoundMaster.Instance.PlaySound(cards.Count > 3 ? SoundName.Shuffle : SoundName.ShuffleShort);
     }
 
     private static List<int> FisherYatesShuffle(ref List<int> cards)
@@ -179,38 +146,21 @@ public static class Stats
         return cardID;
     }
 
-    internal static bool ShuffleIfNeeded()
-    {
-        if(Deck.Count == 0 && Toss.Count > 0) {
-            ScrambleTossPile();
-            return true;
-        }
-        return false;
-    }
+    internal static bool ShuffleNeeded => Deck.Count == 0;
 
     // Animate to toss pile
+    /*
     internal static void AddTossCard(Card card, bool animate = true, Vector3 position = default)
     {
         if (animate) {
             // Don't animate the actual card, use the ghost for this
             Debug.Log("ANIMATE the ghost to the TossPile from: "+position + " to TOssPile "+ DrawCardController.Instance.GetTossPilePosition());
             // Animate Ghost from cards position to TossPile Position
-            GameController.Instance.AnimateGhostFromTo(card, card, position != default ? position : card.transform.position, DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
+            GameController.Instance.AnimateGhostFromTo(card, position : card.transform.position, DrawCardController.Instance.GetTossPilePosition(), () => TossCardCompleted(card));
         }
         else {
             TossCardCompleted(card);
         }
-    }
+    }*/
 
-    private static void TossCardCompleted(Card card)
-    {
-        // Actually move to Toss
-        Toss.Push(card.ID);
-
-        // Make the DrawDeck know it needs to update
-        TossDeckUpdated?.Invoke();
-
-        // Destroy the actual card
-        card.Destroy();
-    }
 }
