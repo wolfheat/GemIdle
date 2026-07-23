@@ -4039,7 +4039,6 @@ RectTransform:
   m_Children:
   - {fileID: 1313089803}
   - {fileID: 2056641053}
-  - {fileID: 1417935702}
   - {fileID: 305071724}
   - {fileID: 54896488}
   - {fileID: 2070408893}
@@ -4050,6 +4049,7 @@ RectTransform:
   - {fileID: 849851125}
   - {fileID: 841893445}
   - {fileID: 1921460861}
+  - {fileID: 1417935702}
   - {fileID: 1887033205}
   m_Father: {fileID: 799623026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

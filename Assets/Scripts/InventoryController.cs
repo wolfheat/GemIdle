@@ -4,6 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Wolfheat.StartMenu;
+using static UnityEngine.UI.Image;
+
+public class InventoryState
+{
+
+    // Part to animate Inventory
+    public List<Card> cards;
+    public List<Vector2> cardsOrigin;
+
+    //public InventoryState(){}
+}
 
 public class InventoryController : MonoBehaviour
 {
@@ -42,13 +53,8 @@ public class InventoryController : MonoBehaviour
         // Hide card, should be done automatically for all cards?
         card.HideVisuals();
 
-        // Part to animate Inventory
-        List<Card> cards = itemHolder.GetComponentsInChildren<Card>().ToList();
-        List<Vector2> cardsOrigin = (cards.Select(x => (Vector2)x.transform.position)).ToList();
 
-        for (int i = 0; i < cards.Count; i++) {
-            cards[i].HideVisuals();
-        }
+        InventoryState state = StoreState();
 
         card.transform.parent = itemHolder;
 
@@ -71,53 +77,31 @@ public class InventoryController : MonoBehaviour
 
         IEnumerator DelayedAnimationRoutine()
         {
-            yield return null;
+            yield return null; // All cards end Up in their new position here by the layoutgroup auto ordering
 
-            for (int i = 0; i < cards.Count; i++) {
-                GameController.Instance.AnimateGhostFromTo(cards[i], cardsOrigin[i]);
+            for (int i = 0; i < state.cards.Count; i++) {
+                GameController.Instance.AnimateGhostFromTo(state.cards[i], state.cardsOrigin[i]);
             }
-
 
             Debug.Log("Animate Ghost Here");
             GameController.Instance.AnimateGhostFromTo(card, origin);
             //GameController.Instance.AnimateGhostFromTo(card, copy, startPos, cardToPlace.transform.position, null);
         }
     }
-    /*
-    internal void PlaceCard(Card cardToPlace, Vector2 startPos, bool unsetOldPosition = true, bool useMousePositionToOrder = true, bool animate = true)
+
+    private InventoryState StoreState()
     {
-        // Place Card in Inventory -  Add it to the Holder - Also keep track of it?
-        cardToPlace.transform.parent = itemHolder;
+        // Part to animate Inventory
+        List<Card> cards = itemHolder.GetComponentsInChildren<Card>().ToList();
+        List<Vector2> cardsOrigin = (cards.Select(x => (Vector2)x.transform.position)).ToList();
 
-        if (useMousePositionToOrder) {
-            int order = GetInventoryOrderByMousePosition();
-            cardToPlace.transform.SetSiblingIndex(order);
+        for (int i = 0; i < cards.Count; i++) {
+            cards[i].HideVisuals();
         }
+        return new InventoryState() { cards = cards, cardsOrigin = cardsOrigin };
+    }
+    
 
-        cardToPlace.transform.localPosition = Vector2.zero;
-
-        // Removes from GameArea if present there
-        GameAreaController.Instance.RemoveOldPlacementIndex(cardToPlace);
-
-        // Make the card forget its placement as well - Need to happen after
-        cardToPlace.UnsetPositionIndex();
-
-        cardToPlace.SetScale();
-
-        Card copy = Instantiate(cardToPlace);
-        
-        cardToPlace.HideVisuals();
-
-        // Wait one frame
-        if (animate)
-            StartCoroutine(DelayedAnimationRoutine());
-
-        IEnumerator DelayedAnimationRoutine()
-        {
-            yield return null;
-            GameController.Instance.AnimateGhostFromTo(cardToPlace, copy, startPos,cardToPlace.transform.position, null);
-        }
-    }*/
 
     private int GetInventoryOrderByMousePosition()
     {
@@ -184,4 +168,21 @@ public class InventoryController : MonoBehaviour
 
     internal Vector2 GetPosition() => itemHolder.transform.position;
 
+    internal void StoreAndAnimateInventory()
+    {
+
+        InventoryState state = StoreState();
+
+        // Wait one frame for layoutgroup update to get new target position
+        StartCoroutine(DelayedAnimationRoutine());
+
+        IEnumerator DelayedAnimationRoutine()
+        {
+            yield return null; // All cards end Up in their new position here by the layoutgroup auto ordering
+
+            for (int i = 0; i < state.cards.Count; i++) {
+                GameController.Instance.AnimateGhostFromTo(state.cards[i], state.cardsOrigin[i]);
+            }
+        }
+    }
 }

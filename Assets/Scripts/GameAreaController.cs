@@ -127,7 +127,12 @@ public class GameAreaController : MonoBehaviour
     internal void PlaceCard(Card card, int xPos, int yPos, bool unsetOldPosition = true)
     {
         Debug.Log("GameArea - Placing Card " + card.name + " Position: " + xPos+","+yPos);
-        
+
+        // If the card comes from the Inventory, inventory needs to know so it can animate correctly
+        if (!card.IsPlaced) {
+            InventoryController.Instance.StoreAndAnimateInventory();
+        }
+
         card.transform.parent = itemHolder.transform;
 
         // Get the gridPosition to place the card at        

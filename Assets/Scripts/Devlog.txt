@@ -45,8 +45,8 @@ Jun 2026
 17/7	* Card Style Change
 23/7	* Complete3d new Move system for the game
 		* Added Itch page with Web build
-
-		* Change the system to have each aniamtion target a real card, and if it moves its direction also change.
+		* Fixed Animation to follow The actual Cards position if it changes, limits to one animation.
+		* Added gradiant for borders for more 3D look on card
 
 		New System, AnyCard That moves starts by hiding its graphic
 		* Any move is happening instantly

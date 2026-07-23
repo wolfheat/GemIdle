@@ -369,4 +369,5 @@ public class Card : BaseCard, IPointerDownHandler, IPointerUpHandler
 
     internal bool IsPlaced => PlacedGameAreaPosition.Pos.x > -1;
 
+    public bool HasAnimatorActive { get; set; }
 }

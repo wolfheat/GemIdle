@@ -397,12 +397,14 @@ public class GameController : MonoBehaviour
         //Stats.TossCard(card);
     }
 
-    internal void AnimateGhostFromTo(Card card, Vector2 fromPos)
+    internal void AnimateGhostFromTo(Card card, Vector3 fromPos)
     {
+        // restrict any card that already has animatin to start another
+        if (card.HasAnimatorActive) return;
+
         //Debug.Log("AnimateGhost "+card.name);
 
         // End Position for the ghost is at the cards position
-        Vector2 toPos = card.transform.position;
 
         StartCoroutine(Animate());
 
@@ -411,7 +413,7 @@ public class GameController : MonoBehaviour
         {
             // Do animation
             //Debug.Log("Animating Ghost card from position " + fromPos + " to " + toPos);
-
+            card.HasAnimatorActive = true;
             // Get a new GhostCard
             BaseCard ghostCard = GetGhostCard(card);
 
@@ -421,11 +423,19 @@ public class GameController : MonoBehaviour
 
             yield return null;
 
-            float animationTime = Vector2.Distance(fromPos, toPos) / GameStats.AnimationSpeed;
+            float distanceRemaining = Vector2.Distance(fromPos, card.transform.position);
+            float animationTime = Vector2.Distance(fromPos, card.transform.position) / GameStats.AnimationSpeed;
+
             float t = 0;
-            while (t < animationTime) {
-                t += Time.deltaTime;
-                ghostCard.transform.position = Vector3.Lerp(fromPos, toPos, t / animationTime);
+            while (distanceRemaining > 0) {
+            //while (t < animationTime) {
+                Vector3 moveDirection = (card.transform.position - ghostCard.transform.position).normalized;
+                Vector3 step = moveDirection * Time.deltaTime * GameStats.AnimationSpeed;
+                // Check for early exit
+                if (step.magnitude >= distanceRemaining) break;
+
+                ghostCard.transform.position = ghostCard.transform.position + step;
+                distanceRemaining = Vector2.Distance(card.transform.position, ghostCard.transform.position);
                 yield return null;
             }
 
@@ -434,7 +444,7 @@ public class GameController : MonoBehaviour
             // Show the Card Again
             Debug.Log("Reinstate Card Visuals after animation completes: "+card.name);
             card.ShowVisuals();
-
+            card.HasAnimatorActive = false;
         }
     }
     /*
