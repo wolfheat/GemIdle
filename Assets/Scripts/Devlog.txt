@@ -47,6 +47,11 @@ Jun 2026
 		* Added Itch page with Web build
 		* Fixed Animation to follow The actual Cards position if it changes, limits to one animation.
 		* Added gradiant for borders for more 3D look on card
+		* Dead cards fixed
+		* Lifting a card noe also animate inventory
+
+
+
 
 		New System, AnyCard That moves starts by hiding its graphic
 		* Any move is happening instantly

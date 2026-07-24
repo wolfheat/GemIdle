@@ -283,7 +283,7 @@ MonoBehaviour:
   backgroundImage: {fileID: 1400233713233815966}
   border: {fileID: 2160951219991758381}
   descriptionText: {fileID: 0}
-  actualCardPart: {fileID: 0}
+  actualCardPart: {fileID: 1406651476579896844}
   inPlay: 1
   cardData: {fileID: 0}
   dotTimer: {fileID: 0}

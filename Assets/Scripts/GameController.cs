@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 using Wolfheat.StartMenu;
 
 public enum CardAction { Invalid, PlaceGameArea, PlaceInventory, Swap, Merge, AddMerge, AddImprint, TossCard };
@@ -15,7 +13,6 @@ public struct DropCardAction
     public Card targetCard;
     public bool useSpecifiedPosition;
 }
-
 public class GameController : MonoBehaviour
 {
     private const float TickTime = 1f;
@@ -108,6 +105,12 @@ public class GameController : MonoBehaviour
 
 
 		mimicCard = cardToDrag;
+
+        if (!mimicCard.IsPlaced) {
+            // In Inventory
+            InventoryController.Instance.StoreAndAnimateInventory();
+        }
+
 		// Deactivate the dragged one
         mimicCard?.gameObject.SetActive(false);
 

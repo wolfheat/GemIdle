@@ -12,7 +12,7 @@ public static class GameStats
     public const int BoxWidth = 140;
     public const int BoxHeight = 140;
     public const float AnimationTime = 0.15f;
-    public const float AnimationSpeed = 300f;
+    public static float AnimationSpeed = 350f;
     //public const float AnimationSpeed = 1000f;
     public const bool UseSpeed = true;
 }
